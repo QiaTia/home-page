@@ -109,6 +109,7 @@ const InternalButton = (props: BaseButtonProps) => {
     const { onClick } = props;
     // https://github.com/ant-design/ant-design/issues/30207
     if (innerLoading || mergedDisabled) {
+      console.log('preventDefault');
       e.preventDefault();
       return;
     }

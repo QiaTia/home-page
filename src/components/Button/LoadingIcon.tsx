@@ -1,6 +1,5 @@
 import { LoadingOutlined } from '@ant-design/icons';
-import CSSMotion from 'rc-motion';
-import { createRef, JSX } from 'preact';
+import { createRef } from 'preact';
 import { useEffect, useState } from 'preact/hooks';
 
 export interface LoadingIconProps {

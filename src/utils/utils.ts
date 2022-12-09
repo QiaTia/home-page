@@ -114,3 +114,78 @@ export const setTheme = (function() {
     document.documentElement.setAttribute('theme', theme);
   }
 })();
+
+/** 返回页面顶部 */
+export function scrollTo(y = 0) {
+  (function smoothscroll() {
+    const currentScroll = (document.documentElement.scrollTop || document.body.scrollTop) - y;
+    if (currentScroll > y) {
+      window.requestAnimationFrame(smoothscroll);
+      window.scrollTo(y, currentScroll - currentScroll / 5);
+    }
+  })();
+}
+
+/** 函数节流 */
+export const Throttle = function (time = 500) {
+  let t = 0;
+  return function (cd: () => any, delay = time) {
+    if (t) return ;
+    cd();
+    t = setTimeout(() => (t = 0), delay);
+  };
+};
+
+export const throttle = Throttle();
+
+/** 函数防抖 */
+export const Debounce = function (time = 50) {
+  let t = 0;
+  return function (cd: () => any, delay = time) {
+    if (t) clearTimeout(t);
+    t = setTimeout(() => cd(), delay);
+  };
+};
+
+export const debounce = Debounce();
+
+class DebounceThrottle {
+  private timer = 0;
+  private time = 300;
+  private isHide = false;
+  private lastTime = Date.now();
+  constructor(time = 300) {
+    this.time = time;
+  }
+  /** 任务进入 */
+  DebounceThrottle(cd: () => any, time = this.time) {
+    this.isHide = false;
+    const Next = () => {
+      cd();
+      this.lastTime = Date.now();
+    };
+    if (this.timer && Date.now() - this.lastTime < time) {
+      this.reset();
+      this.timer = setTimeout(() => {
+        if (this.isHide) this.isHide = false;
+        else Next();
+        this.reset();
+      }, time);
+      return;
+    }
+    Next();
+    this.timer = setTimeout(() => this.reset(), time);
+  }
+  /** 清楚不执行待执行任务 */
+  clear() {
+    this.isHide = true;
+  }
+  /** Reset任务状态 */
+  reset() {
+    clearTimeout(this.timer);
+    this.timer = 0;
+  }
+}
+/** 防抖节流 */
+export const ThrottleDebounce = new DebounceThrottle();
+

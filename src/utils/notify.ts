@@ -88,6 +88,6 @@ notify.warn = (content: string, title?: string, duration?: number) => notify({ c
 
 notify.error = (content: string, title?: string, duration?: number) => notify({ content, title, icon: 'error', duration });
 
-notify.sucess = (content: string, title?: string, duration?: number) => notify({ content, title, icon: "sucess", duration });
+notify.success = (content: string, title?: string, duration?: number) => notify({ content, title, icon: "sucess", duration });
 
 export default notify;

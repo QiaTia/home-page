@@ -1,13 +1,8 @@
-import { useEffect, useState } from 'preact/hooks';
-import { getDsapi } from '../serves/api';
-import Footer from "../components/Footer";
-import './app.less';
-import { setTheme, textToSound } from '../utils/utils';
-import notify from '../utils/notify';
+import './home.less';
 import Button from '@/components/Button/index';
 import { CodepenCircleOutlined, GithubOutlined, SlackOutlined } from '@ant-design/icons';
-import Router, { route } from 'preact-router';
-import Layout from './modules/layout';
+import { route } from 'preact-router';
+import { setTheme } from '@/utils/utils';
 
 /**
  * @description 遍历获取播放器元素
@@ -25,7 +20,7 @@ function getTia():Promise<Element> {
   });
 }
 
-function Home() {
+export default function Home() {
   const groupList = [
     {
       ti: 'Blog',
@@ -39,6 +34,10 @@ function Home() {
       ti: 'Github',
       icon: <GithubOutlined />,
       url: 'https://github.com/QiaTia'
+    }, {
+      ti: 'WG',
+      icon: <GithubOutlined />,
+      url: '/webitem/pages/zdm'
     }
   ];
   function onTap (url:string) {
@@ -56,31 +55,4 @@ function Home() {
   {/* <Button onClick={() => setTheme({ change: true })}>Switch Theme</Button> */}
   </div>
 </div>
-}
-
-export function App() {
-  useEffect(()=> {
-    getAPI();
-  }, []);
-
-  function getAPI() {
-    getDsapi().then(({ data })=> {
-      notify(data.note, data.content, void 0, 0);
-    });
-  }
-  
-  return (
-    <>
-      <Router>
-        <Home path="/" />
-        <Layout path='/webitem' />
-      </Router>
-      <ul className="animo-wrap">
-        {
-          Array(10).fill(0).map((_, i)=> <li key={i}></li>)
-        }
-      </ul>
-      <Footer />
-    </>
-  )
 }

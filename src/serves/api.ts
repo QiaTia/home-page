@@ -1,7 +1,7 @@
 import http from "./request";
 
 /** 获取网购之家数据 */ 
-export const getWgList = () => http.get("/list")
+export const getWgList = () => http.get<API.wgListItemProps[]>("/list")
 
 /** 获取张大妈列表数据 */ 
 export const getZdmList = (filter?: string) => http.get("/zdm", { filter })
