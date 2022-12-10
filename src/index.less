@@ -175,6 +175,12 @@
     padding-top: 5px;
     text-shadow: 0 1px 2px #fff;
   }
+  &-lg .spin-dot{
+    font-size: 64px;
+  }
+  &-sm .spin-dot{
+    font-size: 32px;
+  }
   box-sizing: border-box;
   margin: 0;
   padding: 0;
@@ -398,8 +404,11 @@
 /* 返回顶部 */
 .back-top{
   position: fixed;
-  right: 0;
-  bottom: 0;
+  right: 6%;
+  bottom: 50px;
+  opacity: 0;
+  transition: opacity .2s;
+  &.visible{ opacity: 1 }
   &-content{
     cursor: pointer;
     width: 40px;
