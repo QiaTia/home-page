@@ -6,7 +6,6 @@ import './layout.less';
 
 export default function () {
   const [isLoading, setSpinning] = useState(true);
-
   return <div className="container">
     <Spin spinning={isLoading} tip='hello'>
       <div style={{ height: 200 }}>hello!</div>

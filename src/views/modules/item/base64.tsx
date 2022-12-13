@@ -74,16 +74,19 @@ export default () => {
   }
   return <div className="container flex-algin flex-column" style={{ padding: "60px 0" }}>
     <Spin spinning={ loading } tip="Loading...">
+      {/* @ts-ignore */}
       <Dragger style={{ padding: "0 20px" }} {...props}>
         <p className="ant-upload-drag-icon"><InboxOutlined /></p>
         <p className="ant-upload-text">Click or drag file to this area to base64</p>
+      {/* @ts-ignore */}
       </Dragger>
     </Spin>
     <Spin spinning={ loading } tip="Loading...">
       <div style={{ backgroundColor: "#fff", borderRadius: "2px", marginTop: "60px", padding: "20px" }}>
         <textarea className="textarea" value={ defaultValue } onInput={ handleInput }
           placeholder="Input base64 code to string"
-          autoSize={{ minRows: 4, maxRows: 10 }} />
+          />
+          {/* autoSize={{ minRows: 4, maxRows: 10 }}  */}
         <div className="flex-between">
           <Button onClick = { handleCopy }>Copy Content</Button>
           <Button onClick = { handleBase64 }>To Base64</Button>

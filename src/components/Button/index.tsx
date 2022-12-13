@@ -1,8 +1,10 @@
-import { createRef, JSX }from 'preact';
+import { createRef }from 'preact';
 import { useEffect, useState } from 'preact/hooks';
 import { tuple } from '../__util/type';
 import classNames from 'classnames';
 import LoadingIcon from './LoadingIcon';
+import { React } from "@/layout/typings";
+import { forwardRef } from 'preact/compat';
 
 const prefixCls = 'btn';
 
@@ -28,7 +30,7 @@ export function convertLegacyProps(type?: LegacyButtonType): BaseButtonProps {
 
 export interface BaseButtonProps {
   type?: ButtonType;
-  icon?: JSX.Element;
+  icon?: React.ReactNode;
   /**
    * Shape of Button
    *
@@ -102,7 +104,7 @@ const InternalButton = (props: BaseButtonProps) => {
 
   useEffect(() => {
     // Todo
-    console.log(buttonRef);
+    // console.log(buttonRef);
   }, [buttonRef]);
 
   const handleClick = (e: any) => {
@@ -157,5 +159,4 @@ const Button = InternalButton;
 
 // Button.Group = Group;
 // Button.__ANT_BUTTON = true;
-
-export default Button;
+export default forwardRef<HTMLElement, BaseButtonProps>((props, ref)=> <Button { ...props } ref={ref} />);

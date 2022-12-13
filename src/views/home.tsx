@@ -1,5 +1,5 @@
 import './home.less';
-import Button from '@/components/Button/index';
+import Button from '@/components/Button';
 import { CodepenCircleOutlined, GithubOutlined, SlackOutlined } from '@ant-design/icons';
 import { route } from 'preact-router';
 import { setTheme } from '@/utils/utils';
@@ -7,7 +7,7 @@ import { setTheme } from '@/utils/utils';
 /**
  * @description 遍历获取播放器元素
  */
-function getTia():Promise<Element> {
+function getTia(): Promise<Element> {
   return new Promise((resolve, reject)=>{
     let t = 0
     const getTia = () => {
@@ -34,18 +34,11 @@ export default function Home() {
       ti: 'Github',
       icon: <GithubOutlined />,
       url: 'https://github.com/QiaTia'
-    }, {
-      ti: 'WG',
-      icon: <GithubOutlined />,
-      url: '/webitem/pages/zdm'
     }
   ];
   function onTap (url:string) {
-    if(url[0] == '/') {
-      // Todo
-      route(url)
-    }
-    else window.location.href = url
+    if(url[0] == '/') route(url);
+    else window.location.href = url;
   };
   return <div className="container content flex-column">
   <div class="flex-row content-btn-group">

@@ -8,9 +8,10 @@ export default ()=>{
   const [ list, setList ] = useState<API.wgListItemProps[]>([])
   useEffect(()=>{
     getWgList()
+      // @ts-ignore
       .then( list => setList(list));
   }, [])
-  return <div className="article-list">
+  return <div className="container article-list">
     {
       list.map((item, index)=><article role="article" key={ index } className="article typo">
       <a target="_blank" href={item.h}>

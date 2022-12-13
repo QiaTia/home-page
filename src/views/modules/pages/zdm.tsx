@@ -1,36 +1,35 @@
 import Spin from "@/components/Spin/index"
 import { getZdmList } from "@/serves/api"
 import { useEffect, useState } from "preact/hooks"
+import Menu from "@/components/Menu/index";
 
 export default () => {
-  const [ filterList, setFilterList ] = useState<API.zdmListItemProps[]>([])
-  const [ filterKey, setFilterKey ] = useState('')
-  const [ list, setList ] = useState<API.zdmFilterProps[]>([])
+  const [ filterList, setFilterList ] = useState<API.zdmFilterProps[]>([])
+  const [ filterKey, setFilterKey ] = useState<string>()
+  const [ list, setList ] = useState<API.zdmListItemProps[]>([])
 
-  function init(filter?:string):void {
+  function init(filter?: string) {
+    setList([]);
+    // @ts-ignore
     getZdmList(filter).then(({ tabs, data, tab })=>{
-      setFilterList(tabs)
-      setFilterKey(tab.filter)
-      setList(data)
-    })
+      setFilterList(tabs);
+      // @ts-ignore
+      setList(data);
+    });
   }
 
-  function handleClick ({key}:any):void {
-    setFilterKey(key)
-    setList([])
-    init(key)
+  function handleClick (i: number) {
+    setFilterKey(filterList[i].filter);
+    // setList([])
+    // init(key)
   }
 
-  useEffect(()=>init(), [])
+  useEffect(()=> init(filterKey), [filterKey])
   
   return <>
-    {/* <Menu className="container" onClick={ handleClick } selectedKeys={[filterKey]} mode="horizontal">
-      {
-        filterList.map((item)=> <Menu.Item key={ item.filter }>
-          { item.title }
-        </Menu.Item>)
-      }
-    </Menu> */}
+    <div className="container article-menu">
+      <Menu onChange={ handleClick } list={ filterList.map(({ title })=> ({ title })) } />
+    </div>
     <div className="container article-list">
       {
         list.map(item=><article role="article" key={item.id} className="article typo">
