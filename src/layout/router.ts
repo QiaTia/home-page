@@ -26,5 +26,9 @@ export default [
     title: '下雪吧',
     path: '/webitem/snow',
     component: import('@/views/modules/item/snow')
+  }, {
+    title: 'Base64',
+    path: '/webitem/base64',
+    component: import('@/views/modules/base64')
   }
 ];

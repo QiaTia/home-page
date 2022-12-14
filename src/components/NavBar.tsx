@@ -6,14 +6,19 @@ import { useContext, useEffect, useState } from "preact/hooks";
 import Menu from "./Menu/index";
 import { route } from "preact-router";
 import { createRef } from "preact";
+import { React } from '@/layout/typings';
 
-export default function () {
-  const MenuList = [
-    { title: 'Home', path: '/' },
-    { title: 'Item', path: '/webitem' },
-    { title: 'Cheap', path: '/webitem/pages/wg' },
-    { title: 'ZDM', path: '/webitem/pages/zdm' },
-  ];
+
+interface NavBarProps { fixed?: boolean; children?: React.ReactNode };
+
+export const MenuList = [
+  { title: 'Home', path: '/' },
+  { title: 'Item', path: '/webitem' },
+  { title: 'Cheap', path: '/webitem/pages/wg' },
+  { title: 'ZDM', path: '/webitem/pages/zdm' },
+];
+
+export default function (props: NavBarProps) {
   /** 菜单默认下标 */
   const [defaultIndex, setDefaultIndex] = useState(0);
   /** RouterContent */
@@ -35,7 +40,7 @@ export default function () {
   }, [menuRef]);
   
   return <>
-    <header className={classNames('nav-bar', [ isHome && 'hidden' ])}>
+    <header className={classNames('nav-bar', [ isHome && 'hidden', props.fixed && 'fixed' ])}>
       <div className="container">
         <Menu ref={menuRef}
           defaultIndex={defaultIndex}
@@ -45,8 +50,11 @@ export default function () {
             route(MenuList[i].path, true);
             }
           }/>
+        {
+          props.children && <div className="flex-end">{ props.children }</div>
+        }
       </div>
     </header>
-    <div style={{ height: seatHeight }} className="nav-bar-seat" />
+    { props.fixed &&  <div style={{ height: seatHeight }} className="nav-bar-seat" /> }
   </>
 }

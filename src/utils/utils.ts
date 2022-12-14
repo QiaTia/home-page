@@ -112,6 +112,7 @@ export const setTheme = (function() {
       theme = currentTheme;
     }
     document.documentElement.setAttribute('theme', theme);
+    return theme;
   }
 })();
 
@@ -189,3 +190,20 @@ class DebounceThrottle {
 /** 防抖节流 */
 export const ThrottleDebounce = new DebounceThrottle();
 
+export class DebounceClass {
+  time = 50;
+  timer = 0;
+  constructor(time?: number) {
+    if(time) this.time = time;
+  }
+  clear() {
+    if(this.timer) clearTimeout(this.timer); 
+  }
+  enter(cd: () => any, delay = this.time) {
+    this.clear();
+    this.timer = setTimeout(() =>{
+      cd();
+      this.timer = 0;
+    }, delay);
+  }
+}

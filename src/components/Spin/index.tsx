@@ -1,4 +1,4 @@
-import { ThrottleDebounce } from "@/utils/utils";
+import { DebounceClass } from "@/utils/utils";
 import classNames from "classnames";
 import { useEffect, useState } from "preact/hooks";
 import { JSXInternal } from "preact/src/jsx";
@@ -31,7 +31,7 @@ function shouldDelay(spinning?: boolean, delay?: number): boolean {
 export default (props: SpinClassProps) => {
   const {
     spinning: customSpinning = true,
-    delay,
+    delay = 300,
     className,
     size = 'default',
     tip,
@@ -40,7 +40,7 @@ export default (props: SpinClassProps) => {
     children,
     hashId,
   } = props;
-
+  const debounce = new DebounceClass();
   const [spinning, setSpinning] = useState<boolean>(
     () => customSpinning && !shouldDelay(customSpinning, delay),
   );
@@ -74,11 +74,10 @@ export default (props: SpinClassProps) => {
     
   );
   useEffect(() => {
-    ThrottleDebounce.DebounceThrottle(() => {
-      setSpinning(customSpinning);
-    }, delay);
+    if(customSpinning) setSpinning(customSpinning);
+    else debounce.enter(() => setSpinning(customSpinning), delay);
     return () => {
-      ThrottleDebounce?.clear();
+      debounce?.clear();
     };
   }, [delay, customSpinning]);
 

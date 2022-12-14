@@ -1,35 +1,17 @@
 import Button from '@/components/Button';
-import { InboxOutlined } from '@ant-design/icons'
-import { useState } from "preact/hooks";
+import { useEffect, useState } from "preact/hooks";
 import Spin from "@/components/Spin";
 import notify from "@/utils/notify";
+import Dragger from '@/components/Upload/dragger';
+import MyWorker from './worker?worker';
+import Input from '@/components/Input';
 
-
-function getBase64(file: any): Promise<string | ArrayBuffer | null> {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onload = () => resolve(reader.result);
-    reader.onerror = error => reject(error);
-    reader.readAsDataURL(file);
-  })
-}
+const worker = new MyWorker();
 
 export default () => {
   const [ defaultValue, setValue ] = useState<string>('')
   const [ loading, setLoad ] = useState<boolean>(false)
 
-  const props = {
-    customRequest({ onSuccess, onError, file }: any) {
-      setLoad(true)
-      getBase64(file).then((e) => {
-        setValue(e as string)
-        setLoad(false)
-        onSuccess(e)
-      }).catch(onError)
-    },
-    maxCount: 1,
-    itemRender: () => <li></li>
-  }
   const handleCopy = () => {
     const temp = defaultValue
     // @ts-ignore
@@ -53,14 +35,16 @@ export default () => {
     }
   }
   const handleInput = (e:any) => {
+    console.log(e.target.value);
     setValue(e.target.value)
     // console.log(e.target.value)
   }
   const handleBase64 = () => {
     try{
-      const val = window.btoa(defaultValue)
-      setValue(val)
-    }catch {
+      const val = window.btoa(defaultValue);
+      console.log(val);
+      setValue(val);
+    } catch {
       notify.error(`解析失败, 请检查你输入的内容!`)
     }
   }
@@ -72,28 +56,41 @@ export default () => {
       notify.error(`解析失败, 请检查你输入的内容!`)
     }
   }
+  function onFile(files: FileList) {
+    const [file] = files;
+    if(file.size > 1024 * 1024 * 2) return notify.error('文件体积过大');
+    worker.postMessage(file);
+    setLoad(true);
+  }
+  useEffect(function() {
+    worker.onmessage = function(ev) {
+      setLoad(false);
+      console.log('主线程收到数据 ->>');
+      setValue(ev.data as string);
+    };
+    /** 销毁子进程 */
+    return () => worker.terminate();
+  }, []);
+
   return <div className="container flex-algin flex-column" style={{ padding: "60px 0" }}>
     <Spin spinning={ loading } tip="Loading...">
-      {/* @ts-ignore */}
-      <Dragger style={{ padding: "0 20px" }} {...props}>
-        <p className="ant-upload-drag-icon"><InboxOutlined /></p>
-        <p className="ant-upload-text">Click or drag file to this area to base64</p>
-      {/* @ts-ignore */}
-      </Dragger>
+      <Dragger onFile={onFile} style={{ padding: "0 20px" }} />
     </Spin>
     <Spin spinning={ loading } tip="Loading...">
-      <div style={{ backgroundColor: "#fff", borderRadius: "2px", marginTop: "60px", padding: "20px" }}>
-        <textarea className="textarea" value={ defaultValue } onInput={ handleInput }
+      <div className="base64-wrap">
+        <Input.TextArea className="textarea"
+          onInput={ handleInput } value={defaultValue}
           placeholder="Input base64 code to string"
-          />
-          {/* autoSize={{ minRows: 4, maxRows: 10 }}  */}
-        <div className="flex-between">
+          rows={ 10 }
+          autoSize={{ minRows: 4, maxRows: 10 }}
+        />
+        <div className="base64-footer">
           <Button onClick = { handleCopy }>Copy Content</Button>
           <Button onClick = { handleBase64 }>To Base64</Button>
           <Button onClick = { handleToString }>To String</Button>
+          <Button onClick = { handleToString }>To File</Button>
         </div>     
       </div>
     </Spin>
-
   </div>
 }

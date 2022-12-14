@@ -2,7 +2,6 @@ import './home.less';
 import Button from '@/components/Button';
 import { CodepenCircleOutlined, GithubOutlined, SlackOutlined } from '@ant-design/icons';
 import { route } from 'preact-router';
-import { setTheme } from '@/utils/utils';
 
 /**
  * @description 遍历获取播放器元素
@@ -45,7 +44,6 @@ export default function Home() {
   {
     groupList.map(({ ti, url, icon })=> <Button onClick={ () => onTap(url) } icon={ icon } key={ url } children={ ti } />)
   }
-  {/* <Button onClick={() => setTheme({ change: true })}>Switch Theme</Button> */}
   </div>
 </div>
 }
