@@ -13,7 +13,7 @@ function TextArea (props: InputProp) {
   useEffect(()=> {
     // @ts-ignore
     inputRef.current.value = value;
-    console.log(inputRef.current?.rows);
+    // console.log(inputRef.current?.rows);
   }, [inputRef, value]);
 
   return (<div style={style} className={ classNames('el-input textarea', className?.toString())}>

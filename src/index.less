@@ -45,7 +45,6 @@
 /** 导航菜单 */
 .nav-bar{
   width: 100%;
-  transition: transform .2s;
   background-color: var(--bg-color);
   &.fixed{
     position: fixed;
@@ -56,6 +55,12 @@
   &.hidden{
     transform: translateY(-100%);
     &.nav-bar-seat{ display: none }
+    .home-theme-swicth{
+      transform: translateY(46px);
+    }
+  }
+  &, .home-theme-swicth{
+    transition: transform .25s;
   }
   &-seat{
     display: block;
@@ -876,4 +881,32 @@ textarea {
 
 input:-webkit-autofill {
   background-color: #fff !important;
+}
+
+/** Home Page Style */
+.home-page{
+  height: 100vh;
+  justify-content: flex-end;
+  .btn:hover {
+    filter: drop-shadow(0 0 2em var(--primary-color));
+  }
+  &-btn-group{
+    margin-bottom: 25vh;
+    justify-content: center;
+    .btn + .btn{
+      margin-left: 16px;
+    }
+  }
+}
+/** Footer */
+.footer{
+  border-top: solid 1px var(--border-color);
+  padding-top: 1em;
+  .color-grey{
+    text-indent: 8px;
+  }
+  .copyright{
+    line-height: 3.6;
+    text-align: center;
+  }
 }

@@ -1,3 +1,6 @@
+import { useEffect } from "preact/hooks";
+import { scrollTo } from '@/utils/utils';
+
 const random = (min:number, max:number):number =>  Math.floor(Math.random() * (max - min + 1) + min);
 
 const position = ():number => random(1, 100);
@@ -19,6 +22,7 @@ const SnowFlake = ({ position, delay, duration, name, timing }:snowItemProps) =>
   return <div style={ style } className="snow-snowflake" />
 }
 export default () => {
+  useEffect(() => window.scrollTo({ top: 46 }), []);
   return <div className="snow-animation">
     { Array(100).fill(0).map((_, i)=><SnowFlake key={i} position={position()} delay={delay()} duration={duration()} name={name()} timing={timing()} />) }
   </div>

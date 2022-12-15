@@ -1,0 +1,34 @@
+.btn-switch{
+  height: calc(1em + 2px);
+  font-size: 22px;
+  width: 2em;
+  border: solid 1px var(--border-color);
+  display: inline-block;
+  border-radius: 1em;
+  background-color: var(--bg-color-grey);
+  cursor: pointer;
+  text-align: left;
+  &>span{
+    display: block;
+    width: 1em;
+    height: 1em;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 0.5em;
+    background-color: var(--border-color);
+    transition: background-color .25s,transform .25s;
+    overflow: hidden;
+    svg{
+      fill: var(--text-color);
+    }
+    .anticon{
+      font-size: .7em;
+      width: 1em;
+      height: 1em;
+    }
+  }
+  &.off>span{
+    transform: translateX(1em);
+  }
+}

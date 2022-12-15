@@ -1,4 +1,3 @@
-import './home.less';
 import Button from '@/components/Button';
 import { CodepenCircleOutlined, GithubOutlined, SlackOutlined } from '@ant-design/icons';
 import { route } from 'preact-router';
@@ -39,8 +38,8 @@ export default function Home() {
     if(url[0] == '/') route(url);
     else window.location.href = url;
   };
-  return <div className="container content flex-column">
-  <div class="flex-row content-btn-group">
+  return <div className="container home-page flex-column">
+  <div class="flex-row home-page-btn-group">
   {
     groupList.map(({ ti, url, icon })=> <Button onClick={ () => onTap(url) } icon={ icon } key={ url } children={ ti } />)
   }

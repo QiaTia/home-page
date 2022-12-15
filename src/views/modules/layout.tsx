@@ -1,7 +1,4 @@
-import Button from '@/components/Button/index';
-import Spin from '@/components/Spin/index';
 import { route } from 'preact-router';
-import { useState } from 'preact/hooks';
 /** 懒加载数据 */
 import './layout.less';
 
@@ -12,21 +9,21 @@ export default function () {
       d: "趣味答题练习",
       h: "/webitem/exam/random"
     }, {
-      t: "To Base64",
-      d: "To Base64!",
+      t: "ToBase64",
+      d: "Web Worker子线程处理复杂计算任务, 流程Base64运算! ",
       h: "/webitem/base64"
     }, {
-      t: "Tia-Player",
+      t: "Tia Player",
       d: "在线的网页音乐播放器,两行代码嵌入网页!",
       h: 'http://v.qiatia.cn/tia-player/'
     }, {
-      t: "count-Down",
-      d: "React的倒计时",
-      h: 'startCountdown'
+      t: "CountDown",
+      d: "React 数字动画的倒计时!",
+      h: '/webitem/countdown'
     }, {
       t: "爱心日食",
-      d: "CSS绘制的爱心日食动画",
-      h: "http://v.qiatia.cn/WebTest/love.html"
+      d: "CSS 绘制的爱心日食动画",
+      h: "/webitem/eclipse"
     }, {
       t: "下雪吧",
       d: "CSS绘制下雪的动画!",

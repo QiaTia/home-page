@@ -6,6 +6,7 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc && vite build",
+    "deploy": "sh ./publish/release.sh",
     "preview": "vite preview"
   },
   "dependencies": {

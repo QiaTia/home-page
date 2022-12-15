@@ -8,10 +8,21 @@ import Input from '@/components/Input';
 
 const worker = new MyWorker();
 
+enum WorkerEvent { 
+  /** 文件toBase64 */
+  ftob ='ftob',
+  /** base-64 编码的字符串进行解码。 */
+  atob = 'atob',
+  /** 可以将一个二进制字符串（例如，将字符串中的每一个字节都视为一个二进制数据字节）编码为 Base64 编码的 ASCII 字符串。 */
+  btoa = 'btoa',
+  /** Base64 to File */
+  btof = 'btof'
+}
+
 export default () => {
   const [ defaultValue, setValue ] = useState<string>('')
   const [ loading, setLoad ] = useState<boolean>(false)
-
+  /** 复制到粘贴板 */
   const handleCopy = () => {
     const temp = defaultValue
     // @ts-ignore
@@ -34,42 +45,49 @@ export default () => {
       notify.error(`复制失败, 请手动复制!`)
     }
   }
-  const handleInput = (e:any) => {
-    console.log(e.target.value);
-    setValue(e.target.value)
-    // console.log(e.target.value)
+  /** 输入内容 */
+  const handleInput = (e: Event) => {
+    setValue((e.target as HTMLInputElement).value);
   }
-  const handleBase64 = () => {
-    try{
-      const val = window.btoa(defaultValue);
-      console.log(val);
-      setValue(val);
-    } catch {
-      notify.error(`解析失败, 请检查你输入的内容!`)
-    }
-  }
-  const handleToString = () => {
-    try{
-      const val = window.atob(defaultValue)
-      setValue(val)
-    }catch {
-      notify.error(`解析失败, 请检查你输入的内容!`)
-    }
+  /** 处理数据 */
+  const handleTo = (payload: string, event: WorkerEvent = WorkerEvent.btoa) => {
+    setLoad(true);
+    worker.postMessage({ payload, event });
   }
   function onFile(files: FileList) {
     const [file] = files;
-    if(file.size > 1024 * 1024 * 2) return notify.error('文件体积过大');
-    worker.postMessage(file);
     setLoad(true);
+    worker.postMessage({ payload: file, event: WorkerEvent.ftob });
   }
   useEffect(function() {
     worker.onmessage = function(ev) {
+      const { event, payload, error } = ev.data as { payload: unknown, event: WorkerEvent; error: any };
       setLoad(false);
-      console.log('主线程收到数据 ->>');
-      setValue(ev.data as string);
+      if(error) {
+        console.log(error);
+        notify.error(typeof error == 'string' ? error : `解析失败, 请检查输入的内容!`)
+        return error;
+      }
+      console.log(ev.data);
+      switch(event) {
+        case WorkerEvent.ftob:
+        case WorkerEvent.btoa: 
+        case WorkerEvent.atob:
+          setValue(payload as string);
+          break;
+        case WorkerEvent.btof: {
+          if(ev.data.notify) notify(ev.data.notify);
+          const downEL = document.createElement('a');
+          downEL.setAttribute('download', Math.ceil(Math.random() * 9e9).toString(32).slice(2));
+          downEL.setAttribute('href', URL.createObjectURL(payload as Blob));
+          downEL.click();
+          console.log(payload);
+          break;
+        }
+      }
     };
     /** 销毁子进程 */
-    return () => worker.terminate();
+    return () => worker.onmessage = null;
   }, []);
 
   return <div className="container flex-algin flex-column" style={{ padding: "60px 0" }}>
@@ -86,9 +104,9 @@ export default () => {
         />
         <div className="base64-footer">
           <Button onClick = { handleCopy }>Copy Content</Button>
-          <Button onClick = { handleBase64 }>To Base64</Button>
-          <Button onClick = { handleToString }>To String</Button>
-          <Button onClick = { handleToString }>To File</Button>
+          <Button onClick = { () => handleTo(defaultValue) }>To Base64</Button>
+          <Button onClick = { () => handleTo(defaultValue, WorkerEvent.atob) }>To String</Button>
+          <Button onClick = { () => handleTo(defaultValue, WorkerEvent.btof) }>To File</Button>
         </div>     
       </div>
     </Spin>

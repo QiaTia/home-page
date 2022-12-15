@@ -43,22 +43,22 @@ export default function Layout() {
           routers.map(route => {
             const path = route.path;
             if(route.title) TitileEnum[route.path] = route.title;
-            if(typeof route.component =='function')
+            if(route.component.name !== 'component')
               // @ts-ignore 
               return <route.component path={ path } />
             else
               return <AsyncRoute
                 path={ path }
                 loading={() => <Spin />}
-                getComponent={() => (route.component as Promise<any>).then(module => module.default)}
+                getComponent={async () => (await route.component() as any).default }
               />
           })
         }
       </Router>
-      <BackTop visibilityHeight={100} />
+      <BackTop />
       <ul className="animo-wrap">
         {
-          Array(10).fill(0).map((_, i)=> <li key={i}></li>)
+          Array(10).fill(0).map((_, i)=> <li key={i} />)
         }
       </ul>
       <Footer />
