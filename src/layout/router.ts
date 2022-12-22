@@ -38,5 +38,21 @@ export default [
     title: 'Love Eclipse',
     path: '/webitem/eclipse',
     component: () => import('@/views/modules/item/eclipse')
+  }, {
+    title: 'Peach - Canvas',
+    path: '/webitem/peach',
+    component: () => import('@/views/modules/item/peach')
+  }, {
+    title: 'Snow - Canvas',
+    path: '/webitem/canvas-snow',
+    component: () => import('@/views/modules/item/canvas-snow')
+  }, {
+    title: 'Rain - Canvas',
+    path: '/webitem/canvas-rain',
+    component: () => import('@/views/modules/item/rain')
+  }, {
+    title: 'Typing - 打字机', 
+    path: '/webitem/typing',
+    component: () => import('@/views/modules/item/typing')
   }
 ];

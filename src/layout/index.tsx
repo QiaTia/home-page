@@ -18,6 +18,23 @@ export const RouterContext = createContext<RouterProp>(initState);
 
 const FixedPathList = MenuList.map(item => item.path);
 
+
+/**
+ * @description 遍历获取播放器元素
+ */
+function getTia(): Promise<HTMLDivElement> {
+  return new Promise((resolve, reject)=>{
+    let t = 0
+    const getTia = () => {
+      if(++t > 100) reject('Timeout')
+      const Tia = document.body.querySelector<HTMLDivElement>('.Tia-player');
+      if(!Tia) setTimeout(() => getTia(), 5e2);
+      else resolve(Tia);
+    };
+    getTia();
+  });
+}
+
 export default function Layout() {
 
   const [ curretRouter, dispatchRouter ] = useReducer(reducer, initState);
@@ -34,6 +51,7 @@ export default function Layout() {
     <RouterContext.Provider value={curretRouter}>
       <NavBar fixed={ isFixed } />
       <Router onChange={function (e) {
+        getTia().then(tia => tia.style.fontSize = `${e.url == '/' ? 18 : 16}px`);
         scrollTo(0);
         seFixed(FixedPathList.includes(e.url));
         document.title = TitileEnum[e.url] || TitileEnum['/'] || '';

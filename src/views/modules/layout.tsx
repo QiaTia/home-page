@@ -31,19 +31,19 @@ export default function () {
     }, {
       t: "Peach",
       d: "canvas绘制的桃花飘落动画",
-      h: "http://v.qiatia.cn/WebTest/peach.html"
+      h: "/webitem/peach"
     }, {
       t: "Rain",
       d: "canvas绘制的落雨动画",
-      h: "http://v.qiatia.cn/WebTest/rain.html"
+      h: "/webitem/canvas-rain"
     }, {
       t: "Snow",
       d: "canvas绘制的雪花飘零动画",
-      h: "http://v.qiatia.cn/WebTest/Snow.html"
+      h: "/webitem/canvas-snow"
     }, {
       t: "在线打字游戏机",
       d: "小霸王打字机-其乐无穷",
-      h: "http://v.qiatia.cn/WebTest/dzj.html"
+      h: "/webitem/typing"
     }, {
       t: "OS-X",
       d: "残缺的一个系统",

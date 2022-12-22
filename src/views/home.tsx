@@ -2,22 +2,6 @@ import Button from '@/components/Button';
 import { CodepenCircleOutlined, GithubOutlined, SlackOutlined } from '@ant-design/icons';
 import { route } from 'preact-router';
 
-/**
- * @description 遍历获取播放器元素
- */
-function getTia(): Promise<Element> {
-  return new Promise((resolve, reject)=>{
-    let t = 0
-    const getTia = () => {
-      if(++t > 100) reject('Timeout')
-      const Tia = document.getElementsByClassName('Tia-player')[0];
-      if(!Tia) setTimeout(() => getTia(), 5e2);
-      else resolve(Tia);
-    };
-    getTia();
-  });
-}
-
 export default function Home() {
   const groupList = [
     {

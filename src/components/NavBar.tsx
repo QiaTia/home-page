@@ -20,6 +20,8 @@ export const MenuList = [
   { title: 'ZDM', path: '/pages/zdm' },
 ];
 
+let isLight = false;
+
 export default function (props: NavBarProps) {
   /** 菜单默认下标 */
   const [defaultIndex, setDefaultIndex] = useState(0);
@@ -40,6 +42,9 @@ export default function (props: NavBarProps) {
     const baseEl = menuRef.current.base as HTMLElement;
     setSeatHeight(baseEl.offsetHeight);
   }, [menuRef]);
+  useEffect(() => {
+    isLight = setTheme() == 'light';
+  },[])
   
   return <>
     <header className={classNames('nav-bar', [ isHome && 'hidden', props.fixed && 'fixed' ])}>
@@ -55,12 +60,12 @@ export default function (props: NavBarProps) {
         <div className="flex-end">{ 
           props.children ? props.children :
           <Switch
-            onChange={ (value) => setTheme({ theme: value ? 'dark':"light" }) }
+            onChange={ (value) => setTheme({ theme: value ? "light":'dark' }) }
             title="切换当前主题颜色"
             onNode={ <SunIcon /> }
             offNode={ <MoonIcon /> }
             className="home-theme-swicth"
-            defaultValue={ (setTheme() == 'dark') }
+            current={ isLight }
           />
         }</div>
       </div>

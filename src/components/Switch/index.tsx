@@ -6,14 +6,14 @@ import './index.less';
 
 type BaseSwitchProps =  {
   onChange?: (value: boolean) => void;
-  defaultValue?: boolean,
+  current?: boolean,
   className?: string,
   onNode?: React.ReactNode,
   offNode?: React.ReactNode,
 } & JSXInternal.HTMLAttributes<HTMLButtonElement>;
 
 function Switch(props: BaseSwitchProps) {
-  const { onClick, onNode, offNode, className, defaultValue, onChange, ...btnProps } = props;
+  const { onClick, onNode, offNode, className, current: defaultValue, onChange, ...btnProps } = props;
   const [ currentState, setState ] = useState(defaultValue ?? false); 
   function handleTap() {
     setState(!currentState);
