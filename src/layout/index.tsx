@@ -5,7 +5,7 @@ import Router from "preact-router";
 import AsyncRoute from 'preact-async-route';
 import { useEffect, useReducer, useState } from "preact/hooks";
 import routers from "./router";
-import { scrollTo } from '@/utils/utils';
+import { scrollTo, textToSound } from '@/utils/utils';
 import BackTop from "@/components/BackTop/";
 import Spin from "@/components/Spin/index";
 import { initState, reducer, RouterProp } from "./reducer";
@@ -23,12 +23,12 @@ const FixedPathList = MenuList.map(item => item.path);
  * @description 遍历获取播放器元素
  */
 function getTia(): Promise<HTMLDivElement> {
-  return new Promise((resolve, reject)=>{
+  return new Promise((resolve, reject) => {
     let t = 0
     const getTia = () => {
-      if(++t > 100) reject('Timeout')
+      if (++t > 100) reject('Timeout')
       const Tia = document.body.querySelector<HTMLDivElement>('.Tia-player');
-      if(!Tia) setTimeout(() => getTia(), 5e2);
+      if (!Tia) setTimeout(() => getTia(), 5e2);
       else resolve(Tia);
     };
     getTia();
@@ -37,19 +37,30 @@ function getTia(): Promise<HTMLDivElement> {
 
 export default function Layout() {
 
-  const [ curretRouter, dispatchRouter ] = useReducer(reducer, initState);
-  const [ isFixed, seFixed ] = useState(true);
+  const [curretRouter, dispatchRouter] = useReducer(reducer, initState);
+  const [isFixed, seFixed] = useState(true);
   function getAPI() {
-    getDsapi().then(({ data })=> {
-      notify(data.note, data.content, void 0, 0);
+    getDsapi().then(({ data }) => {
+      notify({
+        content: data.note,
+        title: data.content,
+        duration: 0,
+        actions: [{
+          name: '朗读', 
+          onClick() {
+            textToSound(data.content);
+            return false;
+          }
+        }]
+      });
     });
   }
-  useEffect(()=> {
+  useEffect(() => {
     getAPI();
   }, []);
   return (
     <RouterContext.Provider value={curretRouter}>
-      <NavBar fixed={ isFixed } />
+      <NavBar fixed={isFixed} />
       <Router onChange={function (e) {
         getTia().then(tia => tia.style.fontSize = `${e.url == '/' ? 18 : 16}px`);
         scrollTo(0);
@@ -60,15 +71,15 @@ export default function Layout() {
         {
           routers.map(route => {
             const path = route.path;
-            if(route.title) TitileEnum[route.path] = route.title;
-            if(route.component.name !== 'component')
+            if (route.title) TitileEnum[route.path] = route.title;
+            if (route.component.name !== 'component')
               // @ts-ignore 
-              return <route.component path={ path } />
+              return <route.component path={path} />
             else
               return <AsyncRoute
-                path={ path }
+                path={path}
                 loading={() => <Spin />}
-                getComponent={async () => (await route.component() as any).default }
+                getComponent={async () => (await route.component() as any).default}
               />
           })
         }
@@ -76,7 +87,7 @@ export default function Layout() {
       <BackTop />
       <ul className="animo-wrap">
         {
-          Array(10).fill(0).map((_, i)=> <li key={i} />)
+          Array(10).fill(0).map((_, i) => <li key={i} />)
         }
       </ul>
       <Footer />

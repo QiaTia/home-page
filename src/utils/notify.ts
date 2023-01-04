@@ -1,11 +1,15 @@
 import * as Icons from './icon';
 
 type IconEmum = 'error' | 'sucess'| 'warn' | 'info' | 'right' | 'left' | 'menu' | 'load';
-
+type ActionsProp = {
+  name?: string;
+  onClick?: (value?: unknown) => void;
+};
 interface NotifyOption {
   title: string;
   content: string;
   icon: IconEmum;
+  actions: [action1?: ActionsProp, action2?: ActionsProp];
   duration: number;
 }
 const prefixCls = 'notify';
@@ -13,9 +17,12 @@ const prefixCls = 'notify';
 const $dom = document.createElement("div");
 $dom.className = prefixCls + '-container';
 
+type CB_FN_Prop = (value: unknown) => void;
+
 class Notify {
   $:HTMLDivElement;
-  _CB: any[];
+  _CB: CB_FN_Prop[];
+  _REJECTCB: CB_FN_Prop[];
   Dom?: HTMLDivElement;
   _hide = false;
   $pro_dom?: HTMLDivElement;
@@ -23,27 +30,37 @@ class Notify {
   constructor() {
     this.$ = $dom;
     this._CB = [];
+    this._REJECTCB = [];
     if(!isHave($dom, document.body.childNodes)) document.body.appendChild($dom);
   }
-  create({ title = "提示", content = '', icon, duration = 4500 }: Partial<NotifyOption>) {
+  create({ title = "提示", content = '', icon, duration = 4500, actions }: Partial<NotifyOption>) {
     const NotifyDom = document.createElement("div");
     NotifyDom.className = prefixCls + '-wrap ' + (icon || '');
     // <div class="notify-wrap ${icon}">
-    // @ts-ignore
     const iconEl = icon ? `<i class="icon">${Icons[icon]}</i>` : '';
-    NotifyDom.innerHTML = `${iconEl}<div class="${prefixCls}-content"><h3 class="${prefixCls}-title">${title}</h3><div class="${prefixCls}-msg">${content}</div></div><button class="${prefixCls}-btn">${Icons['error']}</button><div class="${prefixCls}-progress-bar"></div>`
+    const NotifyBtn = actions ? `<div class="${prefixCls}-actions">${ actions.map((item, i) => {
+      if(item?.onClick) (i ? this._REJECTCB : this._CB).push(item.onClick);
+      return `<button class="${prefixCls}-actions-btn">${item?.name || ['确认', '取消'][i]}</button>`;
+    }).join('') }</div>` : '';
+    NotifyDom.innerHTML = `${iconEl}<div class="${prefixCls}-content"><h3 class="${prefixCls}-title">${title}</h3><div class="${prefixCls}-msg">${content}</div></div>${NotifyBtn}<button class="${prefixCls}-btn">${Icons['error']}</button><div class="${prefixCls}-progress-bar"></div>`
     this.$.append(NotifyDom);
     this.Dom = NotifyDom;
-    // 点击回调
-    (NotifyDom.getElementsByClassName(prefixCls + '-btn')[0] as HTMLDivElement).onclick = (e: Event) =>{
-      this.hide()
-      let cb
-      while(cb = this._CB.shift()) cb(e)
-    }
+    /** 点击叉叉 回调 */
+    (NotifyDom.getElementsByClassName(prefixCls + '-btn')[0] as HTMLDivElement)
+      .onclick = (e) => this._REJECT(e);
+    const actionsBtns = NotifyDom.querySelectorAll('.'+prefixCls + '-actions-btn'),
+      ActionCb = [this._RESOLVE, this._REJECT];
+    actionsBtns.forEach((item, i) => item.addEventListener('click',  (e) => {
+      ActionCb[i]?.bind(this)(e);
+    }))
+    // for(let i = 0, len = actionsBtns.length; i < len; i ++) {
+    //   actionsBtns[i];
+    // }
     this._hide = false
+    /** 进度条Dom */
     this.$pro_dom = NotifyDom.getElementsByClassName(prefixCls+'-progress-bar')[0] as HTMLDivElement;
     setTimeout(()=> NotifyDom.style.transform = "translateX(0)", 99);
-    duration && setTimeout(() => this.hide(), duration);
+    duration && setTimeout(() => this._REJECT(), duration);
     return this;
   }
   hide() {
@@ -59,9 +76,24 @@ class Notify {
     if(this, this.$pro_dom) this.$pro_dom.style.width = w + "%";
     return this;
   }
+  /** 叉叉关闭 */
+  _REJECT(e?: Event) {
+    let cb;
+    while(cb = this._REJECTCB.shift()) cb(e);
+    this.hide();
+  }
+  _RESOLVE(e?: Event) {
+    this.hide();
+    let cb;
+    while(cb = this._CB.shift()) cb(e);
+  }
   then(Fn: (value: unknown)=>void){
     this._CB.push(Fn)
     return this
+  }
+  cacth(Fn: (value: unknown)=>void){
+    this._REJECTCB.push(Fn)
+    return this;
   }
 }
 

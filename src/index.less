@@ -376,6 +376,7 @@
     width: 100%;
     padding: 10px;
     display: flex;
+    flex-direction: column;
     align-items: center;
     background-color: var(--bg-color-grey);
     border-radius: 4px;
@@ -432,9 +433,10 @@
     }
   }
   &-content{
-    flex: 1;
+    width: 100%;
     border: none;
-    padding: 0 10px;
+    padding-left: 10px;
+    padding-right: 24px;
     h3{ line-height: 2 }
   }
   &-msg{ margin-bottom: .6em }
@@ -464,6 +466,23 @@
     border-radius: 2px;
     transition: .4s width linear;
     background-color: var(--primary-color);
+  }
+  &-actions{
+    display: flex;
+    flex-direction: row-reverse;
+    width: 100%;
+    &-btn{
+      cursor: pointer;
+      background-color: var(--border-color);
+      color: var(--text-color);
+      padding: 4px 8px;
+      border-radius: 2px;
+      margin-right: 8px;
+      &:hover{
+        opacity: .9;
+        box-shadow: 0 0 12px var(--bg-color-mask);
+      }
+    }
   }
 }
 /* 返回顶部 */
