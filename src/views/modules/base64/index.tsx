@@ -5,6 +5,7 @@ import notify from "@/utils/notify";
 import Dragger from '@/components/Upload/dragger';
 import MyWorker from './worker?worker';
 import Input from '@/components/Input';
+import './base64.less';
 
 const worker = new MyWorker();
 

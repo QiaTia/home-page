@@ -49,7 +49,7 @@ export default function Layout() {
           name: '朗读', 
           onClick() {
             textToSound(data.content);
-            return false;
+            return true;
           }
         }]
       });

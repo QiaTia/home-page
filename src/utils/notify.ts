@@ -83,9 +83,8 @@ class Notify {
     this.hide();
   }
   _RESOLVE(e?: Event) {
-    this.hide();
-    let cb;
-    while(cb = this._CB.shift()) cb(e);
+    if(!this._CB.reduce((value, cb) => value || Boolean(cb(e)), false))
+      this.hide();
   }
   then(Fn: (value: unknown)=>void){
     this._CB.push(Fn)

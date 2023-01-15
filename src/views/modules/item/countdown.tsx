@@ -1,4 +1,6 @@
+import notify from "@/utils/notify";
 import { useEffect, useState } from "preact/hooks";
+import './style/countdown.less';
 
 let timer:number;
 
@@ -52,8 +54,8 @@ const TimeModal = ({ time:{ day, hours, minutes, seconds }}:timeParams) => {
 }
 
 export default function () {
-  let isTurn:boolean;
-  let time = ~~((Date.parse('2022/12/18') - Date.now()) / 1e3);
+  let isTurn: boolean;
+  let time = ~~((Date.parse('2023/01/18') - Date.now()) / 1e3);
   isTurn = time <= 0;
   time = Math.abs(time);
   let day: number = ~~(time / 86400);
@@ -66,30 +68,30 @@ export default function () {
     window.scrollTo({ top: 46 });
     clearInterval(timer);
     timer = setInterval(()=> {
-      // if(isTurn){
-      //   if(++seconds > 59) {
-      //     seconds = 0
-      //     if(++minutes > 59){
-      //       minutes = 0
-      //       if(++hours > 23) {
-      //         hours = 0
-      //         day ++ 
-      //       }
-      //     }
-      //   }
-      // }else{
-      //   if(seconds-- < 1) {
-      //     seconds = 59
-      //     if(--minutes < 1){
-      //       minutes = 59
-      //       if(--hours < 1) {
-      //         hours = 23
-      //         --day
-      //       }
-      //     }
-      //   }
-      // }
-      // if(day == 0 && hours == 0 && minutes == 0 && seconds == 0) Modal.success({ content: "已经达到你预定的时间啦!", okText: "确认" })
+      if(isTurn){
+        if(++seconds > 59) {
+          seconds = 0
+          if(++minutes > 59){
+            minutes = 0
+            if(++hours > 23) {
+              hours = 0
+              day ++ 
+            }
+          }
+        }
+      }else{
+        if(seconds-- < 1) {
+          seconds = 59
+          if(--minutes < 1){
+            minutes = 59
+            if(--hours < 1) {
+              hours = 23
+              --day
+            }
+          }
+        }
+      }
+      if(day == 0 && hours == 0 && minutes == 0 && seconds == 0) notify({ content: "已经达到你预定的时间啦!" });
       setTime({ day, hours, minutes, seconds});
       return () => clearInterval(timer);
     }, 1e3);
