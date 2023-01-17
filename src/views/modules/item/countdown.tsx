@@ -45,12 +45,15 @@ const ModalBlock = ({ unit, num } : modalParams)=>{
 
 const TimeModal = ({ time:{ day, hours, minutes, seconds }}:timeParams) => {
   // const [ day, hours, minutes, seconds ] = [ , time.getHours(), time.getMinutes() ,time.getSeconds()]
-  return (<div style={{ height: '100vh' }} className="container flex-algin">
-    { <ModalBlock  unit="日" num={ day }/> }
-    { <ModalBlock  unit="时" num={ hours }/> }
-    { <ModalBlock  unit="分" num={ minutes }/> }
-    { <ModalBlock  unit="秒" num={ seconds }/> }
-  </div>)
+  const list = [
+    { name: '时', value: hours },
+    { name: '分', value: minutes },
+    { name: '秒', value: seconds },
+  ];
+  if(day == 0 && hours == 0) list.shift();
+  if(day > 0) list.unshift({ name: '日', value: day });
+
+  return (<>{ list.map((item) => <ModalBlock key={item.name} unit={ item.name } num={ item.value }/>) }</>)
 }
 
 export default function () {
@@ -96,5 +99,9 @@ export default function () {
       return () => clearInterval(timer);
     }, 1e3);
   }, []);
-  return(<TimeModal time={timeObj} />)
+  return(
+  <div style={{ height: '100vh' }} className="container flex-algin">
+    {/* <input onInput={console.log} type="datetime-local" /> */}
+    <TimeModal time={timeObj} />
+  </div>)
 }

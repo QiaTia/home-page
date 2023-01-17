@@ -23,9 +23,10 @@ export default function Home() {
     else window.location.href = url;
   };
   return <div className="container home-page flex-column">
-  <div class="flex-row home-page-btn-group">
+
+  <div style={{ marginTop: '48px' }} class="flex-row home-page-btn-group">
   {
-    groupList.map(({ ti, url, icon })=> <Button onClick={ () => onTap(url) } icon={ icon } key={ url } children={ ti } />)
+    groupList.map(({ ti, url, icon })=> <Button onClick={ () => onTap(url) } bird icon={ icon } key={ url } children={ ti } />)
   }
   </div>
 </div>

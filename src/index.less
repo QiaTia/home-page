@@ -39,6 +39,7 @@
   --border-color: #484848;
   --animo-color: 0,0%,100%;
 }
+
 .color-grey{
   color: var(--text-color-grey);
 }
@@ -264,87 +265,7 @@
 }
 @keyframes antSpinMove{to{opacity:1; transform: scale(1.2);}}
 @keyframes antRotate{to{transform:rotate(405deg)}}
-/* Btn按钮组件 */
-.btn {
-  position: relative;
-  display: inline-block;
-  font-weight: 400;
-  white-space: nowrap;
-  text-align: center;
-  background-image: none;
-  background-color: transparent;
-  cursor: pointer;
-  user-select: none;
-  touch-action: manipulation;
-  line-height: 1.57143;
-  // color: rgba(0, 0, 0, 0.88);
-  color: var(--text-color);
-  outline: none;
-  border-width: 1px;
-  border-style: solid;
-  border-color: transparent;
-  border-image: initial;
-  transition: all 0.2s cubic-bezier(0.645, 0.045, 0.355, 1) 0s;
-  font-size: 14px;
-  height: 32px;
-  padding: 4px 15px;
-  border-radius: 6px;
-  &-loading-icon{
-    display: inline-block;
-    transition: all 0.16s ease;
-  }
-  .anticon:not(.anticon-loading){
-    margin-right: 8px;
-  }
-  &-primary {
-    color: var(--bg-color);
-    background-color: var(--primary-color);
-    box-shadow: rgba(5, 145, 255, 0.1) 0px 2px 0px;
-  }
-  &-default {
-    background-color: var(--bg-color-grey);
-    box-shadow: rgba(0, 0, 0, 0.02) 0px 2px 0px;
-    border-color: var(--border-color);
-    &:not(:disabled):hover{
-      border-color: var(--primary-color);
-      color: var(--primary-color);
-    }
-  }
-  &-dangerous{
-    border-color: var(--color-error);
-    color: var(--color-error);
-    &:not(:disabled):hover{
-      border-color: var(--color-error);
-      color: var(--color-error);
-      opacity: 0.89;
-    }
-  }
-  &-background-ghost{
-    background-color: transparent;
-  }
-  &-dashed{
-    border-color: var(--border-color);
-    border-style: dashed;
-    &:not(:disabled):hover{
-      border-color: var(--primary-color);
-      color: var(--primary-color);
-    }
-  }
-  &-text{
-    &:not(:disabled):hover{
-      background-color: var(--bg-color-grey);
-    }
-  }
-  &-link{
-    color: var(--primary-color);
-    &:not(:disabled):hover{
-      opacity: .89;
-    }
-  }
-  &:disabled{
-    cursor: no-drop;
-  }
-}
+
 /* Notify通知 */
 .notify{
   &-container{
@@ -524,6 +445,17 @@
         margin-top: 8px
       }
       flex: 100%
+    }
+  }
+  .home-page{
+    position: relative;
+    &-btn-group{
+      width: 812px;
+      position: absolute;
+      left: 50%;
+      transform: translate(-400px) scale(.4);
+      margin-left: auto;
+      margin-right: auto;
     }
   }
 }

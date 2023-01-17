@@ -5,6 +5,7 @@ import classNames from 'classnames';
 import LoadingIcon from './LoadingIcon';
 import { React } from "@/layout/typings";
 import { forwardRef } from 'preact/compat';
+import './index.less';
 
 const prefixCls = 'btn';
 
@@ -43,6 +44,7 @@ export interface BaseButtonProps {
   ghost?: boolean;
   danger?: boolean;
   block?: boolean;
+  bird?: boolean;
   children?: any;
   htmlType?: ButtonHTMLType;
   ref?: any;
@@ -62,6 +64,7 @@ const InternalButton = (props: BaseButtonProps) => {
     children,
     icon,
     ghost = false,
+    bird = false,
     block = false,
     /** If we extract items here, we don't need use omit.js */
     // React does not recognize the `htmlType` prop on a DOM element. Here we pick it out of `rest`.
@@ -131,6 +134,7 @@ const InternalButton = (props: BaseButtonProps) => {
       [`${prefixCls}-block`]: block,
       [`${prefixCls}-dangerous`]: !!danger,
       [`${prefixCls}-disabled`]:  mergedDisabled,
+      [`${prefixCls}__bird`]:  bird,
     },
     className,
   );
@@ -148,8 +152,23 @@ const InternalButton = (props: BaseButtonProps) => {
       disabled={mergedDisabled}
       ref={buttonRef}
     >
-      { iconNode }
-      {children}
+      <div class={`${prefixCls}__wrapper`}>
+        <span class={`${prefixCls}__text`}>
+          { iconNode }
+          { children }
+        </span>
+      </div>
+      {bird && <div class={`${prefixCls}__bird-box`}>
+        <div class="bird wakeup">
+          <div class="bird__face"></div>
+        </div>
+        <div class="bird wakeup">
+          <div class="bird__face"></div>
+        </div>
+        <div class="bird">
+          <div class="bird__face"></div>
+        </div>
+      </div>}
     </button>
   );
 };
