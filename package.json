@@ -11,6 +11,7 @@
   },
   "dependencies": {
     "@ant-design/icons": "^4.2.1",
+    "@mxsir/image-tiny": "^0.1.0",
     "axios-fetch-mini": "^1.1.1",
     "classnames": "^2.3.2",
     "preact": "^10.11.2",

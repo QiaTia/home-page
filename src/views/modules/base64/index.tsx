@@ -6,6 +6,7 @@ import Dragger from '@/components/Upload/dragger';
 import MyWorker from './worker?worker';
 import Input from '@/components/Input';
 import './base64.less';
+import { downFile } from '@/utils/utils';
 
 const worker = new MyWorker();
 
@@ -22,7 +23,7 @@ enum WorkerEvent {
 
 export default () => {
   const [ defaultValue, setValue ] = useState<string>('')
-  const [ loading, setLoad ] = useState<boolean>(false)
+  const [ loading, setLoad ] = useState(false)
   /** 复制到粘贴板 */
   const handleCopy = () => {
     const temp = defaultValue
@@ -78,10 +79,7 @@ export default () => {
           break;
         case WorkerEvent.btof: {
           if(ev.data.notify) notify(ev.data.notify);
-          const downEL = document.createElement('a');
-          downEL.setAttribute('download', Math.ceil(Math.random() * 9e9).toString(32).slice(2));
-          downEL.setAttribute('href', URL.createObjectURL(payload as Blob));
-          downEL.click();
+          downFile(payload as Blob);
           console.log(payload);
           break;
         }

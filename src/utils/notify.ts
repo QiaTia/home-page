@@ -1,17 +1,24 @@
 import * as Icons from './icon';
 
-type IconEmum = 'error' | 'sucess'| 'warn' | 'info' | 'right' | 'left' | 'menu' | 'load';
+type IconEmum = keyof typeof Icons;
+
 type ActionsProp = {
   name?: string;
   onClick?: (value?: unknown) => void;
 };
-interface NotifyOption {
+export interface NotifyOption {
+  /** Notify标题 */
   title: string;
+  /** Notify内容 */
   content: string;
+  /** Notify图标 */
   icon: IconEmum;
+  /** 触发按钮, 最多两个 { Name: string, onClick: cb } */
   actions: [action1?: ActionsProp, action2?: ActionsProp];
+  /** Notify持续时间 */
   duration: number;
 }
+
 const prefixCls = 'notify';
 
 const $dom = document.createElement("div");
@@ -35,14 +42,14 @@ class Notify {
   }
   create({ title = "提示", content = '', icon, duration = 4500, actions }: Partial<NotifyOption>) {
     const NotifyDom = document.createElement("div");
-    NotifyDom.className = prefixCls + '-wrap ' + (icon || '');
+    NotifyDom.className = `${prefixCls}-wrap ${icon || ''}`;
     // <div class="notify-wrap ${icon}">
     const iconEl = icon ? `<i class="icon">${Icons[icon]}</i>` : '';
     const NotifyBtn = actions ? `<div class="${prefixCls}-actions">${ actions.map((item, i) => {
       if(item?.onClick) (i ? this._REJECTCB : this._CB).push(item.onClick);
       return `<button class="${prefixCls}-actions-btn">${item?.name || ['确认', '取消'][i]}</button>`;
     }).join('') }</div>` : '';
-    NotifyDom.innerHTML = `${iconEl}<div class="${prefixCls}-content"><h3 class="${prefixCls}-title">${title}</h3><div class="${prefixCls}-msg">${content}</div></div>${NotifyBtn}<button class="${prefixCls}-btn">${Icons['error']}</button><div class="${prefixCls}-progress-bar"></div>`
+    NotifyDom.innerHTML = `${iconEl}<div class="${prefixCls}-content"><h3 class="${prefixCls}-title">${title}</h3><div class="${prefixCls}-msg">${content}</div>${NotifyBtn}</div><button class="${prefixCls}-btn">${Icons['error']}</button><div class="${prefixCls}-progress-bar"></div>`
     this.$.append(NotifyDom);
     this.Dom = NotifyDom;
     /** 点击叉叉 回调 */

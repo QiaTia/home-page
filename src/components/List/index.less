@@ -1,0 +1,58 @@
+/** 文章样式 */
+.article- {
+  &list {
+    margin: 20px auto;
+    margin-top: 16px;
+    border: 1px solid var(--border-color);
+    background-color: var(--bg-color-grey);
+    box-shadow: 0 3px 8px -6px rgba(0, 0, 0, .1);
+    border-radius: var(--border-radius);
+    overflow: hidden;
+    margin-bottom: 16px;
+    text-align: center;
+
+    .ant-spin {
+      margin: 100px;
+    }
+
+    .article {
+      transition: All .3s ease-in-out;
+      padding: 4px 8px;
+      text-align: left;
+
+      &+.article {
+        border-top: 1px solid var(--border-color)
+      }
+
+      .entry-title {
+        line-height: 2.4;
+        font-family: inherit;
+        font-weight: 400;
+        font-size: 18px;
+        // line-height: 1.8;
+      }
+
+      .entry-content {
+        span {
+          margin: .5em
+        }
+
+        font-size: 14px;
+        padding-bottom: .4em;
+        overflow: hidden;
+        text-overflow: clip;
+        display: -webkit-box;
+        -webkit-line-clamp: 3;
+        -webkit-box-orient: vertical;
+      }
+    }
+  }
+
+  &menu {
+    margin-top: 16px;
+    padding: 0 16px;
+    border: 1px solid var(--border-color);
+    background-color: var(--bg-color-grey);
+    border-radius: var(--border-radius);
+  }
+}

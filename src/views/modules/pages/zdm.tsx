@@ -2,6 +2,7 @@ import Spin from "@/components/Spin/index"
 import { getZdmList } from "@/serves/api"
 import { useEffect, useState } from "preact/hooks"
 import Menu from "@/components/Menu/index";
+import "@/components/List/index.less";
 
 export default () => {
   const [ filterList, setFilterList ] = useState<API.zdmFilterProps[]>([])
@@ -30,6 +31,7 @@ export default () => {
     <div className="container article-menu">
       <Menu onChange={ handleClick } list={ filterList.map(({ title })=> ({ title })) } />
     </div>
+
     <div className="container article-list">
       {
         list.map(item=><article role="article" key={item.id} className="article typo">

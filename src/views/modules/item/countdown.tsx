@@ -58,7 +58,7 @@ const TimeModal = ({ time:{ day, hours, minutes, seconds }}:timeParams) => {
 
 export default function () {
   let isTurn: boolean;
-  let time = ~~((Date.parse('2023/01/18') - Date.now()) / 1e3);
+  let time = ~~((Date.parse('2023/05/01') - Date.now()) / 1e3);
   isTurn = time <= 0;
   time = Math.abs(time);
   let day: number = ~~(time / 86400);
@@ -70,7 +70,7 @@ export default function () {
   useEffect(() => {
     window.scrollTo({ top: 46 });
     clearInterval(timer);
-    timer = setInterval(()=> {
+    timer = window.setInterval(()=> {
       if(isTurn){
         if(++seconds > 59) {
           seconds = 0

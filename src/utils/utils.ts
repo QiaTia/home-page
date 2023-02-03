@@ -127,13 +127,20 @@ export function scrollTo(y = 0) {
   })();
 }
 
+export function downFile(payload: Blob | MediaSource) {
+  const downEL = document.createElement('a');
+  downEL.setAttribute('download', Math.ceil(Math.random() * 9e9).toString(32).slice(2));
+  downEL.setAttribute('href', URL.createObjectURL(payload));
+  downEL.click();
+}
+
 /** 函数节流 */
 export const Throttle = function (time = 500) {
   let t = 0;
   return function (cd: () => any, delay = time) {
     if (t) return ;
     cd();
-    t = setTimeout(() => (t = 0), delay);
+    t = window.window.setTimeout(() => (t = 0), delay);
   };
 };
 
@@ -144,7 +151,7 @@ export const Debounce = function (time = 50) {
   let t = 0;
   return function (cd: () => any, delay = time) {
     if (t) clearTimeout(t);
-    t = setTimeout(() => cd(), delay);
+    t = window.setTimeout(() => cd(), delay);
   };
 };
 
@@ -167,7 +174,7 @@ class DebounceThrottle {
     };
     if (this.timer && Date.now() - this.lastTime < time) {
       this.reset();
-      this.timer = setTimeout(() => {
+      this.timer = window.setTimeout(() => {
         if (this.isHide) this.isHide = false;
         else Next();
         this.reset();
@@ -175,7 +182,7 @@ class DebounceThrottle {
       return;
     }
     Next();
-    this.timer = setTimeout(() => this.reset(), time);
+    this.timer = window.setTimeout(() => this.reset(), time);
   }
   /** 清楚不执行待执行任务 */
   clear() {
@@ -201,7 +208,7 @@ export class DebounceClass {
   }
   enter(cd: () => any, delay = this.time) {
     this.clear();
-    this.timer = setTimeout(() =>{
+    this.timer = window.setTimeout(() =>{
       cd();
       this.timer = 0;
     }, delay);

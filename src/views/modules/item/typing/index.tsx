@@ -37,7 +37,7 @@ export default function typing () {
   function onError() {
     setError(true);
     clearTimeout(errTime);
-    errTime = setTimeout(() => setError(false), 300);
+    errTime = window.window.setTimeout(() => setError(false), 300);
   }
   return <div style="background-color: #242424;justify-content: center;" className="home-page flex-column flex-algin">
       <div onClick={onError} className={ classNames('typing-char ', isError && 'error')}>

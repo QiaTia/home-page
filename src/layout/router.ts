@@ -54,5 +54,9 @@ export default [
     title: 'Typing - 打字机', 
     path: '/webitem/typing',
     component: () => import('@/views/modules/item/typing')
+  }, {
+    title: 'TinyImage', 
+    path: '/webitem/image/tiny',
+    component: () => import('@/views/modules/image/tiny')
   }
 ];

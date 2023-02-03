@@ -1,16 +1,23 @@
 import { route } from 'preact-router';
+import List from '@/components/List';
 /** 懒加载数据 */
 import './layout.less';
 
 export default function () {
   const list = [
     {
-      t: "趣味答题",
-      d: "趣味答题练习",
-      h: "/webitem/exam/random"
-    }, {
+      t: 'TinyImage',
+      d: 'Web Worker子线程使用wasm有损压缩图片, 压缩率不错!',
+      h: '/webitem/image/tiny'
+    },
+    // {
+    //   t: "趣味答题",
+    //   d: "趣味答题练习",
+    //   h: "/webitem/exam/random"
+    // },
+    {
       t: "ToBase64",
-      d: "Web Worker子线程处理复杂计算任务, 流程Base64运算! ",
+      d: "Web Worker子线程处理复杂计算任务, 流畅Base64转换!",
       h: "/webitem/base64"
     }, {
       t: "Tia Player",
@@ -18,7 +25,7 @@ export default function () {
       h: 'http://v.qiatia.cn/tia-player/'
     }, {
       t: "CountDown",
-      d: "React 数字动画的倒计时!",
+      d: "React 数字动画的倒计时",
       h: '/webitem/countdown'
     }, {
       t: "爱心日食",
@@ -54,21 +61,9 @@ export default function () {
       h: "http://mm.qiatia.cn/"
     }
   ];
-  function handleTap(h: string) {
+  function handleTap({ h }: typeof list[0]) {
     if (h[0] == '/') route(h);
     else window.location.href = h
   };
-  return (<div className="article-list container">
-    {
-      list.map((item, index) => <article role="article" key={index} className="article typo">
-        <a onClick={() => handleTap(item.h)}>
-          <h3 className="entry-title">{item.t}</h3>
-        </a>
-        <div className="entry-content">
-          <span>{item.d}</span>
-          {/* {item.t} */}
-        </div>
-      </article>)
-    }
-  </div>)
+  return (<List<typeof list[0]> handleTap={handleTap} list={list}/>)
 }

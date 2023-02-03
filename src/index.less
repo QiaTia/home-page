@@ -297,7 +297,6 @@
     width: 100%;
     padding: 10px;
     display: flex;
-    flex-direction: column;
     align-items: center;
     background-color: var(--bg-color-grey);
     border-radius: 4px;
@@ -357,7 +356,7 @@
     width: 100%;
     border: none;
     padding-left: 10px;
-    padding-right: 24px;
+    padding-right: 10px;
     h3{ line-height: 2 }
   }
   &-msg{ margin-bottom: .6em }
@@ -398,7 +397,9 @@
       color: var(--text-color);
       padding: 4px 8px;
       border-radius: 2px;
-      margin-right: 8px;
+      &+button{
+        margin-right: 8px;
+      }
       &:hover{
         opacity: .9;
         box-shadow: 0 0 12px var(--bg-color-mask);

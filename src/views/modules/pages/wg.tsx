@@ -1,10 +1,10 @@
+import "@/components/List/index.less";
 import Spin from "@/components/Spin/index"
 import { getWgList } from "@/serves/api"
 import { useEffect, useState } from "preact/hooks"
 
 
 export default ()=>{
-
   const [ list, setList ] = useState<API.wgListItemProps[]>([])
   useEffect(()=>{
     getWgList()
