@@ -9,7 +9,6 @@ let Tiny: Worker;
 
 function TinyImage() {
   const [ loading, setLoad ] = useState(false)
-  notify({ content: 'hello!', icon: 'load', actions: [{ name: 'hello', onClick: console.log}, { name: 'hello', onClick: console.log}] });
   function onFile(files: FileList) {
     if(!files[0]?.type.includes('image')) return notify.error('请拖拽图片文件!', void 0, 0);
     setLoad(true);

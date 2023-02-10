@@ -2,6 +2,7 @@ servePath=/www/qiatia/dist
 
 #!/bin/bash
 execSCP(){
+  node ./publish/setup.js
   echo "==================== SyncFile ===================="
   scp -r -P 922 ./dist/** root@122.112.177.219:$servePath
 
