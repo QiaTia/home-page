@@ -3,7 +3,8 @@ import { getDsapi } from "@/serves/api";
 import notify from "@/utils/notify";
 import Router from "preact-router";
 import AsyncRoute from 'preact-async-route';
-import { useEffect, useReducer, useState } from "preact/hooks";
+import { createHashHistory } from 'history';
+import { useReducer, useState } from "preact/hooks";
 import routers from "./router";
 import { scrollTo, textToSound } from '@/utils/utils';
 import BackTop from "@/components/BackTop/";
@@ -60,7 +61,7 @@ export default function Layout() {
   return (
     <RouterContext.Provider value={curretRouter}>
       <NavBar fixed={isFixed} />
-      <Router onChange={function (e) {
+      <Router history={createHashHistory()} onChange={function (e) {
         // 暂时注释在线服务
         // getTia().then(tia => tia.style.fontSize = `${e.url == '/' ? 18 : 16}px`);
         scrollTo(0);

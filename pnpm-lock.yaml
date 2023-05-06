@@ -13,6 +13,9 @@ dependencies:
   classnames:
     specifier: ^2.3.2
     version: 2.3.2
+  history:
+    specifier: ^5.3.0
+    version: 5.3.0
   preact:
     specifier: ^10.11.2
     version: 10.11.2
@@ -848,6 +851,12 @@ packages:
     dependencies:
       function-bind: 1.1.1
     dev: true
+
+  /history@5.3.0:
+    resolution: {integrity: sha512-ZqaKwjjrAYUYfLG+htGaIIZ4nioX2L70ZUMIFysS3xvBsSG4x/n1V6TXV3N8ZYNuFGlDirFg32T7B6WOUPDYcQ==}
+    dependencies:
+      '@babel/runtime': 7.21.5
+    dev: false
 
   /iconv-lite@0.6.3:
     resolution: {integrity: sha512-4fCk79wshMdzMp2rH06qWrJE4iolqLhCUH+OiuIgU++RB0+94NlDL81atO7GX55uUKueo0txHNtvEyI6D7WdMw==}
