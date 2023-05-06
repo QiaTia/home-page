@@ -32,11 +32,11 @@ jobs:
       - name: Checkout
         uses: actions/checkout@main
       # 使用 node:10
-      - name: use Node.js 16
+      - name: use Node
         uses: actions/setup-node@v1
         with:
-          node-version: 16
-      # npm install
+          node-version: '16.x'
+      # npm install & build
       - name: npm install and build
         run: |
           npm install
