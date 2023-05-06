@@ -55,14 +55,14 @@ export default function Layout() {
       });
     });
   }
-  useEffect(() => {
-    getAPI();
-  }, []);
+  // 暂时注释在线服务
+  // useEffect(() => getAPI(), []);
   return (
     <RouterContext.Provider value={curretRouter}>
       <NavBar fixed={isFixed} />
       <Router onChange={function (e) {
-        getTia().then(tia => tia.style.fontSize = `${e.url == '/' ? 18 : 16}px`);
+        // 暂时注释在线服务
+        // getTia().then(tia => tia.style.fontSize = `${e.url == '/' ? 18 : 16}px`);
         scrollTo(0);
         seFixed(FixedPathList.includes(e.url));
         document.title = TitileEnum[e.url] || TitileEnum['/'] || '';

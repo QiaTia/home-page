@@ -4,8 +4,8 @@ servePath=/www/qiatia/dist
 execSCP(){
   node ./publish/setup.js
   echo "==================== SyncFile ===================="
-  scp -r -P 922 ./dist/** root@122.112.177.219:$servePath
-
+#  scp -r -P 922 ./dist/** root@122.112.177.219:$servePath
+#  服务器过期
   echo "==================== Done! ===================="
 }
 

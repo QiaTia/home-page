@@ -1,0 +1,1 @@
+import{h as i,o as e}from"./index.8f8765f3.js";function l(){return i(()=>window.scrollTo({top:46}),[]),e("div",{className:"eclipse-wrap flex-algin",style:{width:"100%",backgroundColor:"skyblue",animation:"here 6s 0s linear infinite"},children:[0,0].map(()=>e("div",{className:"eclipse-item"}))})}export{l as default};
