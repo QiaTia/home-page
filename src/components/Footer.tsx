@@ -67,6 +67,6 @@ export default function() {
         </div>
       </div> */}
     </div>
-    <p className="copyright typo">Copyright 2018 <a onClick={ e => e.preventDefault() }>QiaTia</a> | <a href="http://www.miitbeian.gov.cn" target="_blank">粤ICP备18119018</a></p>
+    <p className="copyright typo">Copyright 2018 <a onClick={ e => e.preventDefault() }>QiaTia</a></p>
   </footer>
 }
