@@ -16,8 +16,8 @@ interface NavBarProps { fixed?: boolean; children?: React.ReactNode };
 export const MenuList = [
   { title: 'Home', path: '/' },
   { title: 'Item', path: '/webitem' },
-  { title: 'Cheap', path: '/pages/wg' },
-  { title: 'ZDM', path: '/pages/zdm' },
+  // { title: 'Cheap', path: '/pages/wg' },
+  // { title: 'ZDM', path: '/pages/zdm' },
 ];
 
 let isLight = false;
