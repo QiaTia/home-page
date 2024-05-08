@@ -19,11 +19,13 @@ export default function () {
       t: "ToBase64",
       d: "Web Worker子线程处理复杂计算任务, 流畅Base64转换!",
       h: "/webitem/base64"
-    }, {
-      t: "Tia Player",
-      d: "在线的网页音乐播放器,两行代码嵌入网页!",
-      h: 'http://v.qiatia.cn/tia-player/'
-    }, {
+    }, 
+    // {
+    //   t: "Tia Player",
+    //   d: "在线的网页音乐播放器,两行代码嵌入网页!",
+    //   h: 'http://v.qiatia.cn/tia-player/'
+    // },
+    {
       t: "CountDown",
       d: "React 数字动画的倒计时",
       h: '/webitem/countdown'
@@ -51,15 +53,16 @@ export default function () {
       t: "在线打字游戏机",
       d: "小霸王打字机-其乐无穷",
       h: "/webitem/typing"
-    }, {
-      t: "OS-X",
-      d: "残缺的一个系统",
-      h: "http://v.qiatia.cn/OS-X/"
-    }, {
-      t: "ManageMoneyMatters",
-      d: "ManageMoneyMatters",
-      h: "http://mm.qiatia.cn/"
-    }
+    },
+    // {
+    //   t: "OS-X",
+    //   d: "残缺的一个系统",
+    //   h: "http://v.qiatia.cn/OS-X/"
+    // }, {
+    //   t: "ManageMoneyMatters",
+    //   d: "ManageMoneyMatters",
+    //   h: "http://mm.qiatia.cn/"
+    // }
   ];
   function handleTap({ h }: typeof list[0]) {
     if (h[0] == '/') route(h);

@@ -58,7 +58,7 @@ const TimeModal = ({ time:{ day, hours, minutes, seconds }}:timeParams) => {
 
 export default function () {
   let isTurn: boolean;
-  let time = ~~((Date.parse('2023/09/29') - Date.now()) / 1e3);
+  let time = ~~((Date.parse('2024/09/29') - Date.now()) / 1e3);
   isTurn = time <= 0;
   time = Math.abs(time);
   let day: number = ~~(time / 86400);
