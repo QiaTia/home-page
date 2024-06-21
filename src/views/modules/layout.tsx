@@ -61,11 +61,21 @@ export default function () {
       t: "在线打字游戏机",
       d: "小霸王打字机-其乐无穷",
       h: "/webitem/typing"
-    }, {
+    },
+    {
       t: "Exam",
       d: "毕业设计项目, 在线考试系统",
       h: "https://github.com/qiatia/exam"
     }
+    // {
+    //   t: "OS-X",
+    //   d: "残缺的一个系统",
+    //   h: "http://v.qiatia.cn/OS-X/"
+    // }, {
+    //   t: "ManageMoneyMatters",
+    //   d: "ManageMoneyMatters",
+    //   h: "http://mm.qiatia.cn/"
+    // }
   ];
   function handleTap({ h }: typeof list[number]) {
     if (!h) return ;
