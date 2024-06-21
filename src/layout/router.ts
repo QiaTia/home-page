@@ -23,6 +23,16 @@ export default [
     component: () => import('@/views/modules/pages/zdm')
   },
   {
+    title: 'JWT解析',
+    path: '/webitem/jwt',
+    component: () => import('@/views/modules/jwt')
+  },
+  {
+    title: '地图',
+    path: '/webitem/map',
+    component: () => import('@/views/modules/pages/map')
+  },
+  {
     title: '下雪吧',
     path: '/webitem/snow',
     component: () => import('@/views/modules/item/snow')

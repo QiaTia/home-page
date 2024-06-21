@@ -73,11 +73,25 @@
   }
 }
 /** 输入框 */
-.el-input{
+.el-input {
   width: 100%;
   border-radius: var(--border-radius);
   border: solid 1px var(--border-color);
   background-color: white;
+  text-align: left;
+  display: flex;
+  align-items: center;
+  overflow: hidden;
+  &:not(.textarea) {
+    line-height: 32px;
+    height: 32px;
+    width: 320px;
+  }
+  input {
+    width: 100%;
+    padding: 0 0.5em;
+    height: 100%;
+  }
   &:hover, &:focus{
     border-color: var(--primary-color);
   }

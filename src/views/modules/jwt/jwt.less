@@ -1,0 +1,48 @@
+/** base64 */
+.base64-{
+  &wrap{
+    background-color: var(--bg-color-grey);
+    border-radius: var(--border-radius);
+    padding: 16px;
+    margin-top: 28px;
+  }
+  &footer{
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-around;
+    .btn{ margin-top: 12px }
+  }
+}
+.json-wrap {
+  margin-top: 1.2em;
+  text-align: left;
+  resize:none;
+  width: 100%;
+  padding: 8px;
+  color: #eee;
+  letter-spacing: normal;
+  word-spacing: normal;
+  text-transform: none;
+  text-indent: 0px;
+  text-shadow: none;
+  background-color: rgb(57,61,73);
+  overflow-y: scroll;
+  font-size: 16px;
+  word-break: break-all;
+  line-height: 1.4em;
+  .number {
+    color: #2FA0ED;
+  }
+  .string {
+    color: #F16222;
+  }
+  .boolean {
+    color: #00C099;
+  }
+  .null {
+    color: #CC33CC;
+  }
+  .key {
+    color: #eee;
+  }
+}

@@ -10,6 +10,16 @@ export default function () {
       d: 'Web Worker子线程使用wasm有损压缩图片, 压缩率不错!',
       h: '/webitem/image/tiny'
     },
+    {
+      t: "JWT解析",
+      d: "JWT token内容解析",
+      h: "/webitem/jwt"
+    },
+    {
+      t: "坐标解析",
+      d: "坐标解析或拾取",
+      h: "/webitem/map"
+    },
     // {
     //   t: "趣味答题",
     //   d: "趣味答题练习",
@@ -22,7 +32,7 @@ export default function () {
     }, {
       t: "Tia Player",
       d: "在线的网页音乐播放器,两行代码嵌入网页!",
-      h: 'http://v.qiatia.cn/tia-player/'
+      // h: 'http://v.qiatia.cn/tia-player/'
     }, {
       t: "CountDown",
       d: "React 数字动画的倒计时",
@@ -52,17 +62,14 @@ export default function () {
       d: "小霸王打字机-其乐无穷",
       h: "/webitem/typing"
     }, {
-      t: "OS-X",
-      d: "残缺的一个系统",
-      h: "http://v.qiatia.cn/OS-X/"
-    }, {
-      t: "ManageMoneyMatters",
-      d: "ManageMoneyMatters",
-      h: "http://mm.qiatia.cn/"
+      t: "Exam",
+      d: "毕业设计项目, 在线考试系统",
+      h: "https://github.com/qiatia/exam"
     }
   ];
-  function handleTap({ h }: typeof list[0]) {
-    if (h[0] == '/') route(h);
+  function handleTap({ h }: typeof list[number]) {
+    if (!h) return ;
+    else if (h[0] == '/') route(h);
     else window.location.href = h
   };
   return (<List<typeof list[0]> handleTap={handleTap} list={list}/>)

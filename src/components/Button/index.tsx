@@ -4,7 +4,7 @@ import { tuple } from '../__util/type';
 import classNames from 'classnames';
 import LoadingIcon from './LoadingIcon';
 import { React } from "@/layout/typings";
-import { forwardRef } from 'preact/compat';
+import { CSSProperties, forwardRef } from 'preact/compat';
 import './index.less';
 
 const prefixCls = 'btn';
@@ -45,6 +45,7 @@ export interface BaseButtonProps {
   danger?: boolean;
   block?: boolean;
   bird?: boolean;
+  style?: CSSProperties;
   children?: any;
   htmlType?: ButtonHTMLType;
   ref?: any;
