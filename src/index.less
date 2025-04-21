@@ -321,7 +321,7 @@
     &.error{
       .colorize_bg(var(--color-error));
     }
-    &.sucess{
+    &.sucess {
       .colorize_bg(var(--color-success));
     }
     .icon{
@@ -429,6 +429,25 @@
     }
   }
 }
+.tag{
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  font-size: 12px;
+  line-height: 1.8;
+  list-style: none;
+  display: inline-block;
+  height: auto;
+  white-space: nowrap;
+  background: var(--primary-color);
+  color: var(--text-color-inverse);
+  border-radius: 4px;
+  margin-inline-end: 8px;
+  padding-inline: 7px;
+  opacity: 1;
+  text-align: start;
+  position: relative;
+}
 
 .colorize_bg(@color: var(--primary-color)) {
   &::before{ background-color: @color }
@@ -462,8 +481,11 @@
 }
 @media screen and (min-width: 1024px) { .container {  width: 92%; } }
 
-.succes {
+.success {
   color: var(--color-success)!important;
+}
+.fw-600{
+  font-weight: 600
 }
 
 .fail {

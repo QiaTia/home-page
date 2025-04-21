@@ -1,0 +1,29 @@
+@import url(../layout.less);
+
+.tiny-item {
+	width: 100%;
+	text-align: 'left';
+	margin-bottom: 24px;
+	text-align: left;
+	height: 48px;
+	align-items: center;
+	font-size: 14px;
+	&__{
+		&cover {
+			height: 100%;
+			img {
+				height: 100%;
+			}
+		}
+		&body {
+			padding-left: 1em;
+			padding-right: 1em;
+			h4 {
+				max-width: 40vw;
+				white-space: nowrap;
+				overflow: hidden;
+				text-overflow: ellipsis;
+			}
+		}
+	}
+}

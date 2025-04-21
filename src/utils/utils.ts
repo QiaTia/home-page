@@ -214,3 +214,34 @@ export class DebounceClass {
     }, delay);
   }
 }
+
+/**
+
+ * 将字节大小转换为易读的文件单位（自动适配最大单位）
+
+ * @param {number} bytes - 文件字节大小
+
+ * @param {number} [decimals=2] - 保留小数位数（默认2位）
+
+ * @returns {string} 格式化后的文件大小字符串
+
+ */
+export function formatFileSize(bytes: number, decimals = 2) {
+  if (bytes === 0) return '0 Bytes';
+  
+  const k = 1024;
+  const units = ['Bytes', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB'];
+  const dm = decimals < 0 ? 0 : decimals;
+  
+  // 计算适配的单位索引
+  const unitIndex = Math.floor(Math.log(bytes) / Math.log(k));
+  
+  // 处理超大单位情况
+  const adjustedIndex = unitIndex >= units.length ? units.length - 1 : unitIndex;
+  
+  return parseFloat((bytes / Math.pow(k, adjustedIndex)).toFixed(dm)) 
+
+      + ' ' 
+
+      + units[adjustedIndex];
+}
