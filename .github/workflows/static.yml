@@ -33,9 +33,9 @@ jobs:
         uses: actions/checkout@main
       # 使用 node:16
       - name: use Node
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
         with:
-          node-version: '16.x'
+          node-version: '18.x'
       # npm install & build
       - name: npm install and build
         run: |
@@ -44,12 +44,12 @@ jobs:
         env:
           CI: true
       - name: Setup Pages
-        uses: actions/configure-pages@v3
+        uses: actions/configure-pages@v5
       - name: Upload artifact
-        uses: actions/upload-pages-artifact@v1
+        uses: actions/upload-pages-artifact@v3
         with:
           # Upload entire repository
           path: './dist/'
       - name: Deploy to GitHub Pages
         id: deployment
-        uses: actions/deploy-pages@v2
+        uses: actions/deploy-pages@v4
