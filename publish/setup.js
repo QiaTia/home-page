@@ -1,4 +1,4 @@
-import { createReadStream, createWriteStream } from 'fs';
+import { createReadStream, createWriteStream, copyFileSync } from 'fs';
 import { createBrotliCompress, createGzip } from 'zlib';
 import { pipeline } from 'stream';
 
@@ -19,3 +19,5 @@ CompressionFile();
 
 /** 压缩一个gz */
 CompressionFile('gz', void 0, createGzip());
+
+copyFileSync('./dist/index.html', './dist/404.html')

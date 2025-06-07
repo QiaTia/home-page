@@ -68,5 +68,9 @@ export default [
     title: 'TinyImage', 
     path: '/webitem/image/tiny',
     component: () => import('@/views/modules/image/tiny')
+  }, {
+    title: 'BarCodeImage', 
+    path: '/webitem/image/barcode',
+    component: () => import('@/views/modules/image/bar_code')
   }
 ];

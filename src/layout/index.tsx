@@ -3,8 +3,8 @@ import { getDsapi } from "@/serves/api";
 import notify from "@/utils/notify";
 import Router from "preact-router";
 import AsyncRoute from 'preact-async-route';
-import { createHashHistory } from 'history';
-import { useReducer, useState } from "preact/hooks";
+import { createHashHistory, createBrowserHistory } from 'history';
+import { useReducer, useState, useEffect } from "preact/hooks";
 import routers from "./router";
 import { scrollTo, textToSound } from '@/utils/utils';
 import BackTop from "@/components/BackTop/";
@@ -12,8 +12,9 @@ import Spin from "@/components/Spin/index";
 import { initState, reducer, RouterProp } from "./reducer";
 import { createContext } from "preact";
 import NavBar, { MenuList } from "@/components/NavBar";
+import tiaBus from '@/store/bus';
 
-const TitileEnum: Record<string, string> = {};
+const titleList = new Map<string, string>();
 
 export const RouterContext = createContext<RouterProp>(initState);
 
@@ -38,7 +39,7 @@ function getTia(): Promise<HTMLDivElement> {
 
 export default function Layout() {
 
-  const [curretRouter, dispatchRouter] = useReducer(reducer, initState);
+  const [currentRouter, dispatchRouter] = useReducer(reducer, initState);
   const [isFixed, seFixed] = useState(true);
   function getAPI() {
     getDsapi().then(({ data }) => {
@@ -56,30 +57,51 @@ export default function Layout() {
       });
     });
   }
+  function onPaste(ev: ClipboardEvent) {
+    ev.preventDefault();
+    ev.stopPropagation();
+    // @ts-ignore
+    const clipboard = (ev.clipboardData || window.clipboardData) as DataTransfer;
+    const onPublish = (payload: string | File, type = 'text') => tiaBus.publish({ ev: 'paste', type, payload })
+    const types = Array.from(clipboard.types).map(t => t.toLowerCase());
+    if (types.includes('files')) {
+      const file = clipboard.files[0];
+      onPublish(file, 'file');
+    } else if(types.includes('text/plain')) {
+      const text = clipboard.getData('text/plain');
+      onPublish(text);
+    } else {
+      console.log(types);
+    }
+  }
   // 暂时注释在线服务
-  // useEffect(() => getAPI(), []);
+  useEffect(() => {
+    getAPI();
+    document.body.addEventListener('paste', onPaste);
+  }, []);
   return (
-    <RouterContext.Provider value={curretRouter}>
+    <RouterContext.Provider value={currentRouter}>
       <NavBar fixed={isFixed} />
-      <Router history={createHashHistory()} onChange={function (e) {
+      <Router history={createBrowserHistory()} onChange={function (e) {
         // 暂时注释在线服务
         // getTia().then(tia => tia.style.fontSize = `${e.url == '/' ? 18 : 16}px`);
         scrollTo(0);
         seFixed(FixedPathList.includes(e.url));
-        document.title = TitileEnum[e.url] || TitileEnum['/'] || '';
-        dispatchRouter({ type: 'SET_VALUE', payload: { url: e.url, previous: e.previous, title: TitileEnum[e.url] } })
+        const title = titleList.get(e.url) || titleList.get('/') || '';
+        document.title = title;
+        dispatchRouter({ type: 'SET_VALUE', payload: { url: e.url, previous: e.previous, title: title } })
       }}>
         {
           routers.map(route => {
             const path = route.path;
-            if (route.title) TitileEnum[route.path] = route.title;
+            if (route.title) titleList.set(route.path, route.title);
             if (route.component.name !== 'component')
               // @ts-ignore 
               return <route.component path={path} />
             else
               return <AsyncRoute
                 path={path}
-                loading={() => <Spin />}
+                loading={() => <div style={{ margin: '8em 0' }} className="flex-algin"> <Spin /></div>}
                 getComponent={async () => (await route.component() as any).default}
               />
           })

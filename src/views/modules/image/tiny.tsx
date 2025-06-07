@@ -7,8 +7,11 @@ import TinyWorker from './worker?worker';
 import Button from "@/components/Button";
 import './tiny.less';
 import Tag from "@/components/Tag";
+import tiaBus, { type defaultBusEvent } from "@/store/bus";
 
 let Tiny: Worker;
+
+let isFinish = false;
 
 interface FileItem {
   /** 文件名 */
@@ -43,30 +46,37 @@ function genFileInfo(file: File): FileItem {
 function TinyImage() {
   const [ fileList, setFileList ] = useState<FileItem[]>([]);
   const [compressedIndex, setCompressedIndex] = useState(-1);
-  const [ isDone, setDone ] = useState(false);
+  const [ isDone, setDone ] = useState(true);
   const fileListRef = useRef(fileList);
   /** 选择文件时 */
-  function onFile(files: FileList) {
+  function onFile(files: FileList | File[]) {
     if(!files[0]?.type.includes('image')) return notify.error('请拖拽图片文件上传!', void 0, 0);
     setFileList(function(list) {
       const newList = [...list, ...Array.from(files).map(genFileInfo)];
-      if (!isDone) {
+      if (!isFinish) {
         const item = newList[list.length];
         setCompressedIndex(list.length);
         // 发送压缩请求
         Tiny?.postMessage({ payload: { file: item.originFile, uniqueId: item.uniqueId }});
       }
-    // ...
+      // ...
       return newList;
     });
+    isFinish = true;
     setDone(true);
   }
 
   /** 接收到压缩完成事件 */
-  function onCompressComplete({ data }: MessageEvent<{ file: File; uniqueId: string }>) {
+  function onCompressComplete({ data }: MessageEvent<{ file: File; uniqueId: string; status?: string; }>) {
+    if (data.status) {
+      setDone(false);
+      isFinish = false;
+      return;
+    }
     const dIndex = fileListRef.current.findIndex((fileInfo) => fileInfo.uniqueId === data.uniqueId);
     if (dIndex === -1) {
       setDone(false);
+      isFinish = true;
       setCompressedIndex(-1);
       return;
     }
@@ -80,6 +90,7 @@ function TinyImage() {
       Tiny?.postMessage({ payload: { file: next.originFile, uniqueId: next.uniqueId }});
     } else {
       setDone(false);
+      isFinish = false;
       setCompressedIndex(-1);
     }
   }
@@ -90,12 +101,20 @@ function TinyImage() {
     if (!item.compressedFile) return notify.error('文件未压缩完成', void 0);
     downFile(item.compressedFile!);
   }
+  /** 粘贴时 */
+  function onPate(ev: defaultBusEvent) {
+    if(ev.type == 'file') {
+      onFile([ev.payload as File])
+    }
+  }
   useEffect(() => {
     Tiny = new TinyWorker();
     Tiny.onmessage = onCompressComplete;
+    tiaBus.subscribe(onPate);
     return function () {
       Tiny.onmessage = null;
       Tiny.terminate();
+      tiaBus.unsubscribe(onPate);
     }
   },[]);
   useEffect(function () {
@@ -105,7 +124,7 @@ function TinyImage() {
     <>
       <div className="container flex-algin flex-column" style={{ padding: "60px 0" }}>
         <Spin spinning={isDone}>
-          <Dragger accept="image/*" onFile={onFile} style={{ padding: "0 20px" }} />
+          <Dragger accept="image/*" label="Click or drag file to this area to tiny." onFile={onFile} style={{ padding: "0 20px" }} />
         </Spin>
       </div>
       <div className="container flex-algin flex-column">

@@ -40,7 +40,8 @@ jobs:
       - name: npm install and build
         run: |
           npm install
-          npx vite build
+          npm run deploy
+      #    npx vite build
         env:
           CI: true
       - name: Setup Pages

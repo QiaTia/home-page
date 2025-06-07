@@ -1,4 +1,6 @@
-var pngtiny = {};
+var callBack;
+
+var pngtiny = { status: 'loading' };
 pngtiny.instantiateWasm = function (importObject, receiveInstance) {
   fetch('/pngtiny-custom.wasm')
     .then((response) => response.arrayBuffer())
@@ -399,6 +401,8 @@ var R,
     J--;
     b.monitorRunDependencies && b.monitorRunDependencies(J);
     0 == J && (null !== K && (clearInterval(K), (K = null)), L && ((d = L), (L = null), d()));
+    pngtiny.status = 'ready';
+    if(callBack) callBack();
   }
   function c(d) {
     a(d.instance);
@@ -600,6 +604,16 @@ const imageTiny = (file, quality = 80) => {
       reject(error);
     }
   })
+}
+
+export function initImageTiny() {
+  return new Promise((resolve) => {
+    callBack = function () {
+      resolve(imageTiny);
+    }
+    console.log('imageTiny init', pngtiny.status);
+    if (pngtiny.status == 'ready') callBack();
+  });
 }
 
 export default imageTiny;

@@ -9,6 +9,7 @@ type BaseDraggerProps = {
   ref: RefObject<HTMLInputElement>;
   className?: string;
   onFile?: (files: FileList) => void;
+  label?: string;
 } & HTMLAttributes<HTMLInputElement>
 
 const DROP = 'drop';
@@ -41,7 +42,7 @@ function Dragger(props: BaseDraggerProps) {
     <input { ...inputProps } onChange={ onChange } type="file" ref={inputRef} />
     { children ? children : <>
       <p className="upload-dragger-icon"><InboxOutlined /></p>
-      <p className="upload-dragger-text">Click or drag file to this area to base64</p>
+      <p className="upload-dragger-text">{ props.label ?? 'Click or drag file to this area to base64' }</p>
     </> }
   </label>)
 }

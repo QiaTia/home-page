@@ -7,6 +7,7 @@ import MyWorker from './worker?worker';
 import Input from '@/components/Input';
 import './base64.less';
 import { downFile } from '@/utils/utils';
+import tiaBus, { type defaultBusEvent } from '@/store/bus';
 
 const worker = new MyWorker();
 
@@ -61,6 +62,16 @@ export default () => {
     setLoad(true);
     worker.postMessage({ payload: file, event: WorkerEvent.ftob });
   }
+  /** 粘贴时 */
+  function onPate(ev: defaultBusEvent) {
+    console.log(ev);
+    if (ev.type == 'text') {
+      setValue(ev.payload as string);
+    } else if(ev.type == 'file') {
+       setLoad(true);
+        worker.postMessage({ payload: ev.payload as File, event: WorkerEvent.ftob });
+    }
+  }
   useEffect(function() {
     worker.onmessage = function(ev) {
       const { event, payload, error } = ev.data as { payload: unknown, event: WorkerEvent; error: any };
@@ -85,8 +96,12 @@ export default () => {
         }
       }
     };
+    tiaBus.subscribe(onPate);
     /** 销毁子进程 */
-    return () => worker.onmessage = null;
+    return () => {
+      worker.onmessage = null;
+      tiaBus.unsubscribe(onPate);
+    }
   }, []);
 
   return <div className="container flex-algin flex-column" style={{ padding: "60px 0" }}>

@@ -30,9 +30,9 @@ export default function () {
       d: "Web Worker子线程处理复杂计算任务, 流畅Base64转换!",
       h: "/webitem/base64"
     }, {
-      t: "Tia Player",
-      d: "在线的网页音乐播放器,两行代码嵌入网页!",
-      // h: 'http://v.qiatia.cn/tia-player/'
+      t: "BarCode",
+      d: "使用wasm简单二维码生成和识别 !",
+      h: '/webitem/image/barcode'
     }, {
       t: "CountDown",
       d: "React 数字动画的倒计时",

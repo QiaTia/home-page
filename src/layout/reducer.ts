@@ -7,16 +7,16 @@ export interface RouterProp {
   title?: string;
 }
 
-type TypeEmun = 'SET_VALUE';
+const eventList = ['SET_VALUE'] as const;
 
 export const initState = {
   url: '/',
   previous: ''
 };
 
-export function reducer(state: RouterProp,{ type, payload } : { type: TypeEmun, payload: RouterProp }){
+export function reducer(state: RouterProp,{ type, payload } : { type: typeof eventList[number], payload: RouterProp }){
   switch(type) {
-    case 'SET_VALUE': return { ...state, ...payload };
+    case eventList[0]: return { ...state, ...payload };
   default:  return state;
   }
 }
