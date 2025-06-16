@@ -6,7 +6,7 @@ import Dragger from '@/components/Upload/dragger';
 import MyWorker from './worker?worker';
 import Input from '@/components/Input';
 import './base64.less';
-import { downFile } from '@/utils/utils';
+import { downFile, copy2Clipboard } from '@/utils/utils';
 import tiaBus, { type defaultBusEvent } from '@/store/bus';
 
 const worker = new MyWorker();
@@ -27,26 +27,9 @@ export default () => {
   const [ loading, setLoad ] = useState(false)
   /** 复制到粘贴板 */
   const handleCopy = () => {
-    const temp = defaultValue
-    // @ts-ignore
-    if (window.clipboardData){
-      // @ts-ignore
-      window.clipboardData.clearData();
-      // @ts-ignore
-      clipboardData.setData("Text", temp);
-      notify.success("已复制内容到剪辑版!")
-    }else if(document.execCommand('copy')){
-      const oInput = document.createElement('input');
-      oInput.value = temp;
-      document.body.appendChild(oInput);
-      // oInput.style.display='none'
-      oInput.select(); // 选择对象
-      document.execCommand("Copy"); // 执行浏览器复制命令
-      oInput.remove();
-      notify.success("已复制内容到剪辑版!")
-    }else{
-      notify.error(`复制失败, 请手动复制!`)
-    }
+    copy2Clipboard(defaultValue)
+      .then(() => notify.success("已复制内容到剪辑版!"))
+      .catch(() => notify.error('复制失败, 请手动复制!'));
   }
   /** 输入内容 */
   const handleInput = (e: Event) => {

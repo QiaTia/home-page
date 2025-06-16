@@ -5,13 +5,31 @@ import Dragger from "@/components/Upload/dragger";
 import tiaBus, { defaultBusEvent } from "@/store/bus";
 import { useEffect, useState } from "preact/hooks"
 import './tiny.less';
-import { writeBarcode, type WriterOptions } from "zxing-wasm/writer";
+import { writeBarcode, type WriterOptions, prepareZXingModule, readBarcodes, type ReaderOptions  } from "zxing-wasm";
 import notify from "@/utils/notify";
+import { copy2Clipboard } from "@/utils/utils";
+// import { addScript } from "@/utils/utils";
+
 const writerOptions: WriterOptions = {
   format: "QRCode",
   scale: 3,
 };
+const readerOptions: ReaderOptions = {
+  tryHarder: true,
+  formats: ["QRCode"],
+  maxNumberOfSymbols: 1,
+};
 
+prepareZXingModule({
+  overrides: {
+    locateFile(path: string, prefix: string) {
+      if (path.endsWith(".wasm")) {
+        return `https://unpkg.com/zxing-wasm@2.1.2/dist/full/${path}`;
+      }
+      return prefix + path;
+    },
+  },
+});
 
 function barCode() {
   const [ defaultValue, setValue ] = useState<string>('')
@@ -24,9 +42,32 @@ function barCode() {
   /** 文件 */
   function onFile(files: FileList | File[]) {
     /**  */
+    const file = files[0];
+    if(!file.type.includes('image')) return notify.error('请拖拽图片文件上传!', void 0, 0);
+    setLoad(true);
+    readBarcodes(file, readerOptions)
+      .then((result) => {
+        if (result.length > 0) {
+          setValue(result[0].text);
+        } else {
+          notify.error("No barcode found!");
+        }
+      })
+      .finally(() => {
+        setLoad(false);
+      });
   }
   /** 复制 */
-  async function handleCopy() {
+  function handleCopy() {
+    if (!defaultValue) {
+      notify.error("请输入内容!");
+      return;
+    }
+    copy2Clipboard(defaultValue)
+      .then(() => notify.success("复制成功!"));
+  }
+
+  async function handle2Image() {
     if (!defaultValue) {
       notify.error("请输入内容!");
       return;
@@ -50,30 +91,31 @@ function barCode() {
       tiaBus.unsubscribe(onPate);
     }
   }, []);
-  return (<div className="container flex-column" style={{ padding: "60px 0" }}>
-    <div className="flex-algin flex-layout" style={{ gap: 24 }}>
-      {/* <Spin spinning={ loading } tip="Loading...">
-        <Dragger onFile={onFile} style={{ padding: "0 20px" }} />
-      </Spin> */}
-      <Spin spinning={ loading } tip="Loading...">
-        <div className="base64-wrap">
-          <Input.TextArea className="textarea"
-            onInput={ handleInput }
-            value={defaultValue}
-            placeholder="Input base64 code to string"
-            rows={ 10 }
-            autoSize={{ minRows: 4, maxRows: 10 }}
-          />   
-        </div>
-      </Spin>
-      { imgUrl ? <div className="flex-algin">
-        <img style={{ maxWidth: '48vw', minWidth: 200 }} src={ 'data:image/svg+xml;base64,' + imgUrl } alt="base64" />
-      </div> : null}
+  return (<Spin spinning={loading} tip="Loading...">
+    <div className="container flex-column" style={{ gap: 20, padding: "60px 0" }}>
+      <Dragger accept="image/*" label="Click or drag file to this area to." onFile={onFile} style={{ padding: "0 20px" }} />
+      <div className="flex-algin flex-layout" style={{ gap: 24 }}>
+        <Spin spinning={false}>
+          <div className="base64-wrap">
+            <Input.TextArea className="textarea"
+              onInput={ handleInput }
+              value={defaultValue}
+              placeholder="Input QC code content!"
+              rows={ 10 }
+              autoSize={{ minRows: 4, maxRows: 10 }}
+            />   
+          </div>
+        </Spin>
+        { imgUrl ? <div className="flex-algin">
+          <img style={{ maxWidth: '48vw', minWidth: 200 }} src={ 'data:image/svg+xml;base64,' + imgUrl } alt="base64" />
+        </div> : null}
+      </div>
+      <div className="flex-center" style={{ gap: 8 }}>
+        <Button onClick = { handleCopy }>Copy Content</Button>
+        <Button onClick={ handle2Image }>String To QC Image</Button>
+      </div>    
     </div>
-    <div style={{ marginTop: '3em' }} className="base64-footer">
-      <Button onClick={ handleCopy }>String To QcImage</Button>
-    </div>    
-  </div>)
+  </Spin>)
 }
 
 export default barCode;

@@ -245,3 +245,42 @@ export function formatFileSize(bytes: number, decimals = 2) {
 
       + units[adjustedIndex];
 }
+/**
+ * 添加脚本
+ * @param src 脚本地址
+ */
+export function addScript(src: string) {
+  return new Promise<Event>((resolve, reject) =>{
+    const script = document.createElement('script');
+    script.src = src;
+    script.onload = resolve;
+    script.onerror = reject;
+    document.head.appendChild(script);
+  })
+}
+
+/** 复制文本到剪贴板 */
+export function copy2Clipboard(text: string) {
+  return new Promise<void>((resolve, reject) =>{
+    // @ts-ignore
+    if (window.clipboardData) {
+      // @ts-ignore
+      window.clipboardData.clearData();
+      // @ts-ignore
+      clipboardData.setData("Text", text);
+      resolve();
+    } else if(document.execCommand('copy')) {
+      const oInput = document.createElement('input');
+      oInput.value = text;
+      document.body.appendChild(oInput);
+      // oInput.style.display='none'
+      oInput.select(); // 选择对象
+      document.execCommand("Copy"); // 执行浏览器复制命令
+      oInput.remove();
+      resolve();
+    } else {
+      reject();
+    }
+  })
+
+}
