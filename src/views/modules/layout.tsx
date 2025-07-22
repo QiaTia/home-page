@@ -38,6 +38,10 @@ export default function () {
       d: "React 数字动画的倒计时",
       h: '/webitem/countdown'
     }, {
+      t: "DailyLuckCard",
+      d: "幸运签",
+      h: '/webitem/DailyLuckCard'
+    }, {
       t: "爱心日食",
       d: "CSS 绘制的爱心日食动画",
       h: "/webitem/eclipse"

@@ -13,6 +13,7 @@
     "@ant-design/icons": "^5.3.7",
     "@uiw/react-amap-api-loader": "^6.0.4",
     "@uiw/react-amap-map": "^6.0.4",
+    "antd": "^5.26.6",
     "axios-fetch-mini": "^1.1.1",
     "classnames": "^2.3.2",
     "history": "^5.3.0",

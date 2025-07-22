@@ -72,5 +72,9 @@ export default [
     title: 'BarCodeImage', 
     path: '/webitem/image/barcode',
     component: () => import('@/views/modules/image/bar_code')
+  }, {
+    title: 'DailyLuckCard', 
+    path: '/webitem/DailyLuckCard',
+    component: () => import('@/views/modules/DailyLuckCard/daily_luck_card')
   }
 ];

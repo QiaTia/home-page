@@ -284,3 +284,29 @@ export function copy2Clipboard(text: string) {
   })
 
 }
+/** 获取随机颜色 */
+export function getRandomColor() {
+  return '#' + Math.floor(Math.random() * 0xffffff).toString(16).padStart(6, '0');
+}
+/** 获取随机整数 */
+export function getRandomInt(min: number, max: number) {
+  min = Math.ceil(min);
+  max = Math.floor(max);
+  return Math.floor(Math.random() * (max - min + 1)) + min;
+}
+/** 获取格式化时间 */
+export function getFormatDate(format = 'yyyy-MM-dd hh:mm:ss', date = new Date()) {
+  const year = date.getFullYear();
+  const month = date.getMonth() + 1;
+  const day = date.getDate();
+  const hour = date.getHours();
+  const minute = date.getMinutes();
+  const second = date.getSeconds();
+  return format.replace(/yyyy/g, year.toString())
+    .replace(/MM/g, month.toString().padStart(2, '0'))
+    .replace(/dd/g, day.toString().padStart(2, '0'))
+    .replace(/hh/g, hour.toString().padStart(2, '0'))
+    .replace(/mm/g, minute.toString().padStart(2, '0'))
+    .replace(/ss/g, second.toString().padStart(2, '0'));
+}
+
