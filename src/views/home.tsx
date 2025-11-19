@@ -6,7 +6,7 @@ export default function Home() {
   const groupList = [
     {
       ti: 'Blog',
-      url: 'https://blog.qiatia.cn',
+      url: '/',
       icon: <CodepenCircleOutlined />
     }, {
       ti: 'Stroll',

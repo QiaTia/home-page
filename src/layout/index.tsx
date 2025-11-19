@@ -82,7 +82,7 @@ export default function Layout() {
   return (
     <RouterContext.Provider value={currentRouter}>
       <NavBar fixed={isFixed} />
-      <Router history={createBrowserHistory()} onChange={function (e) {
+      <Router history={createHashHistory()} onChange={function (e) {
         // 暂时注释在线服务
         // getTia().then(tia => tia.style.fontSize = `${e.url == '/' ? 18 : 16}px`);
         scrollTo(0);
