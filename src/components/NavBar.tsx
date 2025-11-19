@@ -48,7 +48,7 @@ export default function (props: NavBarProps) {
   
   return <>
     <header className={classNames('nav-bar', [ isHome && 'hidden', props.fixed && 'fixed' ])}>
-      <div className="container flex-row flex-center">
+      <div className="container flex-row flex-algin">
         <Menu ref={menuRef}
           defaultIndex={defaultIndex}
           list={MenuList}

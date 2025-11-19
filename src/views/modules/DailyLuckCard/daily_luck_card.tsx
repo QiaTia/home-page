@@ -45,7 +45,7 @@ function getRandomItems<T>(arr: readonly T[], count = 3): T[] {
 function generateLuck() {
   const theme = getRandomItem<(typeof luckThemes)[number]>(luckThemes);
   return {
-    date: getFormatDate('YYYY年M月D日'),
+    date: getFormatDate('yyyy年MM月dd日'),
     number: Math.floor(Math.random() * 100),
     theme,
     quote: luckQuotes[theme],
