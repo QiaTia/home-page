@@ -4,6 +4,7 @@ import Spin from "@/components/Spin";
 import notify from "@/utils/notify";
 import Input from '@/components/Input';
 import './jwt.less';
+import tiaBus, { type defaultBusEvent } from '@/store/bus';
 
 const decoder = new TextDecoder()
 
@@ -94,6 +95,22 @@ export default () => {
       return jsonTemp as string;
     }
   }
+  function onPate(ev: defaultBusEvent) {
+    if (ev.type == 'text') {
+      setValue(ev.payload as string);
+    } else if(ev.type == 'file') {
+      setLoad(true);
+    }
+  }
+
+  useEffect(() => {
+    tiaBus.subscribe(onPate);
+      /** 销毁子进程 */
+      return () => {
+        tiaBus.unsubscribe(onPate);
+      }
+  }, [])
+
   return <div className="container flex-algin flex-column" style={{ padding: "60px 0" }}>
     <Spin spinning={ loading } tip="Loading...">
       <div className="base64-wrap">
