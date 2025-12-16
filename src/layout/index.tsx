@@ -108,11 +108,12 @@ export default function Layout() {
         }
       </Router>
       <BackTop />
-      <ul className="animo-wrap">
+      {/* <ul className="animo-wrap">
         {
           Array(10).fill(0).map((_, i) => <li key={i} />)
         }
-      </ul>
+      </ul> */}
+      <div class="animo-snow"><div class="big"></div><div class="small"></div></div>
       <Footer />
     </RouterContext.Provider>
   )
