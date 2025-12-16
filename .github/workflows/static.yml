@@ -37,10 +37,11 @@ jobs:
         with:
           node-version: '18.x'
       # npm install & build
-      - name: npm install and build
+      - name: pnpm install and build
         run: |
-          npm install
-          npm run deploy
+          npm install -g pnpm
+          pnpm install
+          pnpm run deploy
       #    npx vite build
         env:
           CI: true
