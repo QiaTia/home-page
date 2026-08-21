@@ -20,10 +20,12 @@
     "preact": "^10.22.0",
     "preact-async-route": "^2.2.1",
     "preact-router": "^4.1.0",
+    "three": "0.160.0",
     "zxing-wasm": "^2.1.2"
   },
   "devDependencies": {
     "@preact/preset-vite": "^2.8.2",
+    "@types/three": "0.160.0",
     "less": "^4.1.3",
     "typescript": "^5.4.5",
     "vite": "^5.3.1",

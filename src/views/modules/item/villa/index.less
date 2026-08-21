@@ -1,0 +1,210 @@
+/* 梦想家 · 农村自建别墅 3D 预览（抽离自 rural-villa.html） */
+.villa-wrap {
+  /* 整页层级: 覆盖全局 footer/导航等固定元素, 但低于通知组件(z-index:1010) */
+  position: relative;
+  z-index: 100;
+  --ink: #23282e;
+  --ink-2: #6f757c;
+  --paper: rgba(252, 250, 246, 0.9);
+  --hairline: rgba(35, 40, 46, 0.14);
+  --wood: #a9805a;
+  --seal: #b5543f;
+  --mono: Consolas, "SF Mono", Menlo, monospace;
+  --serif: "Songti SC", "STSong", SimSun, serif;
+  --sans: "PingFang SC", "Microsoft YaHei", system-ui, sans-serif;
+  --plan-bg: #fcfaf6;
+  font-family: var(--sans);
+  color: var(--ink);
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  .villa-scene {
+    position: fixed; inset: 0;
+    canvas { display: block; }
+  }
+
+  .vignette {
+    position: fixed; inset: 0; pointer-events: none; z-index: 1;
+    background: radial-gradient(ellipse at center, transparent 55%, rgba(18, 24, 30, 0.2) 100%);
+  }
+
+  .card {
+    position: fixed; z-index: 10;
+    background: var(--paper); border: 1px solid var(--hairline); border-radius: 14px;
+    backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
+    box-shadow: 0 10px 34px rgba(30, 34, 40, 0.16);
+    transition: background .4s, border-color .4s;
+  }
+
+  /* ---------- 标题卡 ---------- */
+  .title-card { top: 18px; left: 18px; display: flex; gap: 16px; padding: 16px 20px 14px 16px; }
+  .title-col { display: flex; flex-direction: column; align-items: center; gap: 10px; }
+  .title-vert {
+    writing-mode: vertical-rl; font-family: var(--serif); font-weight: 700;
+    font-size: 28px; letter-spacing: .32em; line-height: 1; color: var(--ink);
+    padding-left: 14px; border-left: 1px solid var(--hairline);
+  }
+  .seal {
+    width: 28px; height: 28px; border-radius: 6px; background: var(--seal); color: #fdf6ee;
+    font-family: var(--serif); font-size: 15px; display: grid; place-items: center;
+    user-select: none;
+  }
+  .meta { display: flex; flex-direction: column; gap: 7px; padding-top: 1px; }
+  .meta h2 { font-size: 14px; font-weight: 600; letter-spacing: .04em; }
+  .meta .sub { font-size: 12px; color: var(--ink-2); }
+  .meta .facts { margin-top: 4px; border-top: 1px solid var(--hairline); padding-top: 7px; display: flex; gap: 14px; }
+  .meta .facts div { font-size: 11px; color: var(--ink-2); line-height: 1.5; }
+  .meta .facts b { display: block; font-family: var(--mono); font-size: 13px; color: var(--ink); font-weight: 600; }
+
+  /* ---------- 指标面板 ---------- */
+  .panel { top: 18px; right: 18px; width: 284px; overflow: hidden; }
+  .panel-head {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 12px 16px 10px; cursor: pointer; user-select: none;
+  }
+  .panel-head h3 { font-size: 13px; font-weight: 600; letter-spacing: .08em; }
+  .panel-head .chev { font-size: 11px; color: var(--ink-2); transition: transform .25s; }
+  .panel.collapsed .chev { transform: rotate(-90deg); }
+  .panel-body { padding: 0 16px 12px; max-height: 60vh; overflow-y: auto; }
+  .panel.collapsed .panel-body { display: none; }
+  .row { display: flex; justify-content: space-between; gap: 12px; padding: 6px 0; border-top: 1px solid var(--hairline); font-size: 12px; }
+  .row:first-child { border-top: none; }
+  .row .k { color: var(--ink-2); flex-shrink: 0; }
+  .row .v { text-align: right; color: var(--ink); }
+  .row .v em { font-style: normal; font-family: var(--mono); }
+  .panel-note { margin-top: 8px; padding-top: 8px; border-top: 1px dashed var(--hairline); font-size: 11px; color: var(--ink-2); line-height: 1.6; }
+
+  /* ---------- 底部控制条 ---------- */
+  .dock {
+    left: 50%; bottom: 20px; transform: translateX(-50%);
+    display: flex; align-items: center; gap: 10px; padding: 8px 10px; flex-wrap: wrap; justify-content: center;
+    max-width: calc(100vw - 32px);
+  }
+  .seg { display: flex; gap: 2px; background: rgba(255,255,255,.5); border: 1px solid var(--hairline); border-radius: 999px; padding: 3px; }
+  .seg button {
+    border: none; background: transparent; padding: 7px 13px; border-radius: 999px;
+    font-size: 13px; font-family: var(--sans); color: var(--ink-2); cursor: pointer; transition: all .18s;
+    white-space: nowrap;
+  }
+  .seg button:hover { color: var(--ink); }
+  .seg button.active { background: var(--ink); color: #f7f4ee; }
+  .chips { display: flex; gap: 6px; }
+  .chip {
+    border: 1px solid var(--hairline); background: rgba(255,255,255,.5); color: var(--ink-2);
+    padding: 7px 13px; border-radius: 999px; font-size: 13px; font-family: var(--sans);
+    cursor: pointer; transition: all .18s; white-space: nowrap;
+  }
+  .chip:hover { color: var(--ink); }
+  .chip[aria-pressed="true"] { border-color: var(--wood); color: var(--wood); background: rgba(169,128,90,.12); font-weight: 600; }
+  button:focus-visible, .chip:focus-visible { outline: 2px solid var(--wood); outline-offset: 2px; }
+
+  .hint { position: fixed; left: 20px; bottom: 20px; z-index: 10; font-size: 12px; color: var(--ink-2); text-shadow: 0 1px 0 rgba(255,255,255,.5); user-select: none; }
+
+  /* ---------- 平面图面板 ---------- */
+  .plan-panel {
+    top: 150px; left: 18px; width: 348px;
+    max-height: calc(100vh - 236px);
+    display: flex; flex-direction: column; overflow: hidden;
+  }
+  .plan-panel[hidden] { display: none; }
+  .plan-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; padding: 14px 16px 10px; cursor: grab; user-select: none; touch-action: none; &:active { cursor: grabbing; } }
+  .plan-title { font-size: 13px; font-weight: 600; letter-spacing: .04em; }
+  .plan-sub { font-size: 11px; color: var(--ink-2); margin-top: 3px; }
+  .plan-close { border: none; background: transparent; font-size: 18px; line-height: 1; color: var(--ink-2); cursor: pointer; padding: 2px 6px; border-radius: 6px; }
+  .plan-close:hover { color: var(--ink); background: rgba(127,127,127,.12); }
+  .plan-tabs { display: flex; gap: 2px; margin: 0 16px 10px; background: rgba(127,127,127,.1); border: 1px solid var(--hairline); border-radius: 999px; padding: 3px; }
+  .ptab { flex: 1; border: none; background: transparent; padding: 6px 0; border-radius: 999px; font-size: 12px; font-family: var(--sans); color: var(--ink-2); cursor: pointer; transition: all .18s; }
+  .ptab.active { background: var(--ink); color: #f7f4ee; }
+  .plan-body { flex: 1; overflow: auto; padding: 0 10px 4px; }
+  .plan-body svg { display: block; width: 100%; height: auto; }
+  .plan-legend { display: flex; flex-wrap: wrap; gap: 6px 14px; padding: 10px 16px 12px; border-top: 1px solid var(--hairline); font-size: 11px; color: var(--ink-2); }
+  .plan-legend .sw { display: inline-block; width: 12px; height: 12px; border-radius: 3px; vertical-align: -2px; margin-right: 5px; }
+  .sw-void { background: rgba(169,128,90,.16); border: 1px solid rgba(169,128,90,.8); }
+  .sw-master { background: rgba(181,84,63,.1); border: 1px solid rgba(181,84,63,.65); }
+  .cam-dot { display: inline-block; width: 9px; height: 9px; border-radius: 50%; background: #2f6fb8; border: 2px solid var(--plan-bg); box-shadow: 0 0 0 1px rgba(47,111,184,.5); vertical-align: -1px; margin-right: 5px; }
+
+  /* 平面图 SVG 元素 */
+  .plan-svg-el { background: transparent; }
+  .plan-svg-el .pr-room { fill: rgba(35,40,46,.05); stroke: rgba(35,40,46,.34); stroke-width: 1; }
+  .plan-svg-el .pr-open { fill: rgba(35,40,46,.02); stroke: rgba(35,40,46,.16); stroke-width: 1; stroke-dasharray: 3 3; }
+  .plan-svg-el .pr-void { fill: rgba(169,128,90,.14); stroke: rgba(169,128,90,.8); stroke-width: 1.2; }
+  .plan-svg-el .pr-master { fill: rgba(181,84,63,.09); stroke: rgba(181,84,63,.65); stroke-width: 1.2; }
+  .plan-svg-el .pr-low { fill: url(#plow); stroke: rgba(35,40,46,.2); stroke-width: 1; }
+  .plan-svg-el .pr-wall { fill: none; stroke: var(--ink); stroke-width: 3; }
+  .plan-svg-el .pr-gap { stroke: var(--plan-bg); stroke-width: 6; stroke-linecap: butt; }
+  .plan-svg-el .pr-door { stroke: rgba(111,117,124,.9); stroke-width: 1.1; fill: none; }
+  .plan-svg-el .pr-win { stroke: #7fa8c9; stroke-width: 3.2; stroke-linecap: butt; }
+  .plan-svg-el .pr-win2 { stroke: #7fa8c9; stroke-width: 5; stroke-linecap: butt; }
+  .plan-svg-el .pr-slide { stroke: rgba(111,117,124,.9); stroke-width: 2; }
+  .plan-svg-el .pr-step { stroke: rgba(35,40,46,.3); stroke-width: .8; }
+  .plan-svg-el .pr-env { fill: none; stroke: rgba(35,40,46,.5); stroke-width: 1.2; stroke-dasharray: 6 4; }
+  .plan-svg-el .pr-road { fill: rgba(35,40,46,.8); }
+  .plan-svg-el .pr-roadline { stroke: rgba(252,250,246,.75); stroke-width: 1.6; stroke-dasharray: 10 8; }
+  .plan-svg-el .pr-name { font: 600 12px var(--sans); fill: var(--ink); }
+  .plan-svg-el .pr-area { font: 10.5px var(--mono); fill: var(--ink-2); }
+  .plan-svg-el .pr-note { font: 10px var(--sans); fill: var(--ink-2); }
+  .plan-svg-el .pr-label { font: 10.5px var(--sans); fill: rgba(252,250,246,.9); letter-spacing: .15em; }
+  .plan-svg-el .pr-label2 { font: 10.5px var(--sans); fill: var(--ink-2); letter-spacing: .12em; }
+  .plan-svg-el .pr-sky { fill: rgba(127,168,201,.14); stroke: #7fa8c9; stroke-width: 1; stroke-dasharray: 4 3; }
+  .plan-svg-el .pr-camfov { fill: rgba(47,111,184,.15); stroke: rgba(47,111,184,.4); stroke-width: 1; }
+  .plan-svg-el .pr-camdot { fill: #2f6fb8; stroke: var(--plan-bg); stroke-width: 2; }
+  .plan-svg-el .pr-camdir { stroke: #2f6fb8; stroke-width: 2; stroke-linecap: round; }
+  .plan-svg-el .roomg { cursor: pointer; }
+  .plan-svg-el .roomg:hover rect { stroke: var(--wood); stroke-width: 1.6; }
+
+  /* ---------- 夜间 HUD ---------- */
+  &.night .card { background: rgba(28, 32, 38, 0.86); border-color: rgba(255,255,255,.14); }
+  &.night .card, &.night .card * { color: #e8eaed; }
+  &.night .title-vert, &.night .row .v, &.night .meta .facts b, &.night .panel-head h3, &.night .meta h2 { color: #f0f1f3; }
+  &.night .row .k, &.night .meta .sub, &.night .hint, &.night .panel-note, &.night .meta .facts div { color: #9aa3ad; }
+  &.night .seg button { color: #9aa3ad; }
+  &.night .seg button.active { background: #e8eaed; color: #23282e; }
+  &.night .chip { background: rgba(255,255,255,.06); border-color: rgba(255,255,255,.16); color: #9aa3ad; }
+  &.night .chip[aria-pressed="true"] { border-color: #c79b6e; color: #d8b48c; background: rgba(199,155,110,.16); }
+  &.night .title-vert { border-color: rgba(255,255,255,.16); }
+  &.night .row, &.night .meta .facts { border-color: rgba(255,255,255,.12); }
+  &.night .plan-panel { --plan-bg: #1c2026; }
+  &.night .plan-svg-el .pr-name { fill: #e8eaed; }
+  &.night .plan-svg-el .pr-area, &.night .plan-svg-el .pr-note, &.night .plan-svg-el .pr-label2 { fill: #9aa3ad; }
+  &.night .plan-svg-el .pr-wall { stroke: #e8eaed; }
+  &.night .plan-svg-el .pr-room { fill: rgba(255,255,255,.045); stroke: rgba(255,255,255,.24); }
+  &.night .plan-svg-el .pr-open { fill: rgba(255,255,255,.02); stroke: rgba(255,255,255,.14); }
+  &.night .plan-svg-el .pr-void { fill: rgba(169,128,90,.2); stroke: rgba(199,155,110,.9); }
+  &.night .plan-svg-el .pr-master { fill: rgba(213,120,98,.14); stroke: rgba(213,120,98,.7); }
+  &.night .plan-svg-el .pr-low { stroke: rgba(255,255,255,.16); }
+  &.night .plan-svg-el .pr-env { stroke: rgba(255,255,255,.3); }
+  &.night .plan-svg-el .pr-road { fill: rgba(255,255,255,.1); }
+  &.night .plan-svg-el .pr-roadline { stroke: rgba(255,255,255,.3); }
+  &.night .plan-svg-el .pr-step { stroke: rgba(255,255,255,.22); }
+  &.night .plan-svg-el .pr-door, &.night .plan-svg-el .pr-slide { stroke: #9aa3ad; }
+  &.night .plan-svg-el .pr-camdot { stroke: #1c2026; }
+  &.night .cam-dot { border-color: #1c2026; }
+  &.night .plan-close { color: #9aa3ad; }
+  &.night .plan-close:hover { color: #e8eaed; background: rgba(255,255,255,.08); }
+
+  /* ---------- 加载层 ---------- */
+  .villa-loader {
+    position: fixed; inset: 0; z-index: 99; display: grid; place-items: center;
+    background: #f4f1ea; transition: opacity .6s;
+    &.hide { opacity: 0; pointer-events: none; }
+  }
+  .loader-inner { text-align: center; }
+  .loader-inner .seal { width: 44px; height: 44px; font-size: 22px; border-radius: 8px; margin: 0 auto 16px; }
+  .loader-text { font-size: 13px; color: #6f757c; letter-spacing: .2em; }
+
+  @media (max-width: 860px) {
+    .panel { width: 240px; }
+    .title-vert { font-size: 22px; }
+  }
+  @media (max-width: 640px) {
+    .title-card { padding: 12px 14px 10px 12px; gap: 10px; }
+    .title-vert { font-size: 18px; padding-left: 10px; }
+    .meta h2 { font-size: 12px; }
+    .meta .sub { font-size: 10px; }
+    .meta .facts { gap: 9px; }
+    .hint { display: none; }
+    .dock { bottom: 12px; gap: 6px; }
+    .seg button, .chip { padding: 6px 10px; font-size: 12px; }
+    .plan-panel { left: 12px; right: 12px; width: auto; top: auto; bottom: 64px; max-height: 54vh; }
+  }
+}

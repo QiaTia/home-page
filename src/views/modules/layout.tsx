@@ -67,6 +67,16 @@ export default function () {
       h: "/webitem/typing"
     },
     {
+      t: "GoTo",
+      d: "输入地址或网络协议, 一键跳转!",
+      h: '/webitem/goto'
+    },
+    {
+      t: "梦想家",
+      d: "梦想中的乡间小院",
+      h: '/webitem/villa'
+    },
+    {
       t: "Exam",
       d: "毕业设计项目, 在线考试系统",
       h: "https://github.com/qiatia/exam"
@@ -86,5 +96,7 @@ export default function () {
     else if (h[0] == '/') route(h);
     else window.location.href = h
   };
-  return (<List<typeof list[0]> handleTap={handleTap} list={list}/>)
+  return (<div className="webitem-list-wrap">
+    <List<typeof list[0]> handleTap={handleTap} list={list}/>
+  </div>)
 }

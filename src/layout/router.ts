@@ -73,8 +73,16 @@ export default [
     path: '/webitem/image/barcode',
     component: () => import('@/views/modules/image/bar_code')
   }, {
-    title: 'DailyLuckCard', 
+    title: 'DailyLuckCard',
     path: '/webitem/DailyLuckCard',
     component: () => import('@/views/modules/DailyLuckCard/daily_luck_card')
+  }, {
+    title: 'GoTo - 链接跳转',
+    path: '/webitem/goto',
+    component: () => import('@/views/modules/item/goto')
+  }, {
+    title: '梦想家',
+    path: '/webitem/villa',
+    component: () => import('@/views/modules/item/villa')
   }
 ];
