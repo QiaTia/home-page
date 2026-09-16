@@ -116,15 +116,26 @@ export const setTheme = (function() {
   }
 })();
 
-/** 返回页面顶部 */
+/** 进行中的平滑滚动动画句柄, 新调用会取消上一次动画 */
+let scrollRafId = 0;
+
+/** 平滑滚动到指定纵向位置: 固定时长内完成, 必然收敛, 不会与用户滚动对抗 */
 export function scrollTo(y = 0) {
-  (function smoothscroll() {
-    const currentScroll = (document.documentElement.scrollTop || document.body.scrollTop) - y;
-    if (currentScroll > y) {
-      window.requestAnimationFrame(smoothscroll);
-      window.scrollTo(y, currentScroll - currentScroll / 5);
-    }
-  })();
+  cancelAnimationFrame(scrollRafId);
+  const start = document.documentElement.scrollTop || document.body.scrollTop;
+  if (Math.abs(start - y) < 1) {
+    window.scrollTo(0, y);
+    return;
+  }
+  const duration = 300;
+  const startTime = performance.now();
+  const step = (now: number) => {
+    const t = Math.min((now - startTime) / duration, 1);
+    const ease = 1 - (1 - t) ** 3; // easeOutCubic
+    window.scrollTo(0, start + (y - start) * ease);
+    if (t < 1) scrollRafId = requestAnimationFrame(step);
+  };
+  scrollRafId = requestAnimationFrame(step);
 }
 
 export function downFile(payload: Blob | MediaSource) {

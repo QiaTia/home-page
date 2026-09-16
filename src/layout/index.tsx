@@ -20,6 +20,9 @@ export const RouterContext = createContext<RouterProp>(initState);
 
 const FixedPathList = MenuList.map((item) => item.path);
 
+/** hash 路由历史实例: 只创建一次, 避免每次渲染重新订阅导致路由抖动 */
+const hashHistory = createHashHistory();
+
 /**
  * @description 遍历获取播放器元素
  */
@@ -88,7 +91,7 @@ export default function Layout() {
       </div>
       <NavBar fixed={isFixed} />
       <Router
-        history={createHashHistory()}
+        history={hashHistory}
         onChange={function (e) {
           // 暂时注释在线服务
           // getTia().then(tia => tia.style.fontSize = `${e.url == '/' ? 18 : 16}px`);
