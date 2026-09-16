@@ -1,11 +1,24 @@
 import Button from '@/components/Button';
 import Input from '@/components/Input';
-import { useState } from 'preact/hooks';
+import { useEffect, useState } from 'preact/hooks';
 import notify from '@/utils/notify';
+import tiaBus, { type defaultBusEvent } from '@/store/bus';
 import './index.less';
 
 export default function () {
   const [value, setValue] = useState('');
+
+  /** 全局粘贴分发: 粘贴文本时填入输入框 */
+  function onPaste(ev: defaultBusEvent) {
+    if (ev.type == 'text') setValue((ev.payload as string).trim());
+  }
+
+  useEffect(() => {
+    tiaBus.subscribe(onPaste);
+    return () => {
+      tiaBus.unsubscribe(onPaste);
+    };
+  }, []);
 
   const handleInput = (e: Event) => {
     setValue((e.target as HTMLInputElement).value);
