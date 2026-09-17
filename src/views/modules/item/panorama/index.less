@@ -1,0 +1,184 @@
+/** 全屏层级: 覆盖全局 footer/导航, 与 villa 页保持一致 */
+.pano-wrap {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  background-color: #000;
+  overflow: hidden;
+
+  .pano-stage {
+    position: absolute;
+    inset: 0;
+
+    canvas {
+      width: 100%;
+      height: 100%;
+      display: block;
+      touch-action: none;
+      cursor: grab;
+
+      &:active {
+        cursor: grabbing;
+      }
+    }
+  }
+
+  .pano-title {
+    position: absolute;
+    top: 24px;
+    left: 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    padding: 12px 18px;
+    border-radius: 14px;
+    border: 1px solid rgba(255, 255, 255, 0.25);
+    background-color: rgba(20, 20, 24, 0.55);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    pointer-events: none;
+
+    &-text {
+      color: #fff;
+      font-size: 18px;
+      font-weight: 600;
+      letter-spacing: 1px;
+    }
+
+    &-sub {
+      color: rgba(255, 255, 255, 0.6);
+      font-size: 12px;
+    }
+  }
+
+  .pano-back {
+    position: absolute;
+    top: 24px;
+    right: 24px;
+    padding: 8px 18px;
+    border-radius: 999px;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    background-color: rgba(20, 20, 24, 0.55);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    color: #fff;
+    font-size: 14px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+
+    &:hover {
+      background-color: rgba(60, 60, 68, 0.7);
+    }
+  }
+
+  .pano-toolbar {
+    position: absolute;
+    bottom: 28px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 14px;
+    border-radius: 999px;
+    border: 1px solid rgba(255, 255, 255, 0.22);
+    background-color: rgba(20, 20, 24, 0.55);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+  }
+
+  .pano-btn {
+    padding: 8px 18px;
+    border-radius: 999px;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    background-color: transparent;
+    color: #fff;
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.2s;
+
+    &:hover {
+      background-color: rgba(255, 255, 255, 0.12);
+    }
+
+    &.active {
+      border-color: #53e3a6;
+      color: #53e3a6;
+      background-color: rgba(83, 227, 166, 0.12);
+    }
+  }
+
+  /** 画面包裹视角滑杆 */
+  .pano-fov {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 0 6px;
+
+    &-label {
+      color: rgba(255, 255, 255, 0.85);
+      font-size: 13px;
+      white-space: nowrap;
+    }
+
+    input[type='range'] {
+      width: 120px;
+      accent-color: #53e3a6;
+      cursor: pointer;
+    }
+  }
+
+  /** WebXR VRButton: 去除自带绝对定位, 融入工具栏 */
+  .pano-vr-btn {
+    display: flex;
+
+    button {
+      position: static !important;
+      left: auto !important;
+      bottom: auto !important;
+      width: auto !important;
+      min-width: 80px;
+      padding: 8px 18px;
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      border-radius: 999px;
+      background-color: transparent;
+      color: #fff;
+      font-size: 14px;
+      cursor: pointer;
+      opacity: 1;
+
+      &:hover {
+        background-color: rgba(255, 255, 255, 0.12);
+      }
+    }
+  }
+
+  .pano-loading {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
+    background-color: rgba(0, 0, 0, 0.72);
+    color: rgba(255, 255, 255, 0.85);
+    font-size: 14px;
+    letter-spacing: 1px;
+
+    &-spin {
+      width: 36px;
+      height: 36px;
+      border: 3px solid rgba(255, 255, 255, 0.18);
+      border-top-color: #53e3a6;
+      border-radius: 50%;
+      animation: pano-spin 0.9s linear infinite;
+    }
+  }
+}
+
+@keyframes pano-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}

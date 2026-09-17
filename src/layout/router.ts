@@ -84,5 +84,9 @@ export default [
     title: '梦想家',
     path: '/webitem/villa',
     component: () => import('@/views/modules/item/villa')
+  }, {
+    title: '全景',
+    path: '/webitem/panorama',
+    component: () => import('@/views/modules/item/panorama')
   }
 ];

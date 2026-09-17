@@ -77,6 +77,11 @@ export default function () {
       h: '/webitem/villa'
     },
     {
+      t: "全景",
+      d: "360° 全景照片, 支持陀螺仪与 VR 模式",
+      h: '/webitem/panorama'
+    },
+    {
       t: "Exam",
       d: "毕业设计项目, 在线考试系统",
       h: "https://github.com/qiatia/exam"
