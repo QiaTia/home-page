@@ -1,5 +1,5 @@
 // import html2canvas from 'html2canvas';
-import { useEffect, useState } from 'preact/hooks';
+import { useState } from 'preact/hooks';
 import styles from './DailyLuckCard.module.less';
 import { getFormatDate } from '@/utils/utils';
 import { Divider, Tag } from 'antd';
@@ -40,12 +40,13 @@ function getRandomItems<T>(arr: readonly T[], count = 3): T[] {
 
 /**
  * 生成每日幸运运势
+ * @param date - 缓存键，自然日（yyyy-MM-dd）
  * @returns 包含每日幸运运势的对象
  */
-function generateLuck() {
+function generateLuck(date: string) {
   const theme = getRandomItem<(typeof luckThemes)[number]>(luckThemes);
   return {
-    date: getFormatDate('yyyy年MM月dd日'),
+    date,
     number: Math.floor(Math.random() * 100),
     theme,
     quote: luckQuotes[theme],
@@ -60,24 +61,36 @@ function generateLuck() {
   };
 };
 
-function DailyLuckCard() {
-  const [luck, setLuck] = useState(generateLuck());
-  // const cardRef = useRef<HTMLDivElement>(null);
+type LuckData = ReturnType<typeof generateLuck>;
 
-  useEffect(() => {
-    const today = getFormatDate('YYYY年M月D日');
+const getTodayKey = () => getFormatDate('yyyy-MM-dd');
+
+/**
+ * 读取当日运势：同一自然日命中缓存直接复用，否则生成并落盘
+ */
+function readLuck(): LuckData {
+  const today = getTodayKey();
+  try {
     const stored = localStorage.getItem(LOCAL_KEY);
     if (stored) {
-      const parsed = JSON.parse(stored);
-      if (parsed.date === today) {
-        setLuck(parsed);
-        return;
-      }
+      const parsed = JSON.parse(stored) as LuckData;
+      if (parsed?.date === today) return parsed;
     }
-    const newLuck = generateLuck();
+  } catch (e) {
+    // 缓存损坏或不可用时忽略，重新生成
+  }
+  const newLuck = generateLuck(today);
+  try {
     localStorage.setItem(LOCAL_KEY, JSON.stringify(newLuck));
-    setLuck(newLuck);
-  }, []);
+  } catch (e) {
+    // 隐私模式等写入失败时不影响展示
+  }
+  return newLuck;
+}
+
+function DailyLuckCard() {
+  const [luck] = useState<LuckData>(readLuck);
+  // const cardRef = useRef<HTMLDivElement>(null);
 
   // const handleDownload = async () => {
   //   if (!cardRef.current) return;
