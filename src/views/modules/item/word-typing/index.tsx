@@ -137,10 +137,50 @@ function BookPicker({ bookIndex, chapterIndex, onConfirm, onClose }: PickerProps
   );
 }
 
+/** 进度本地存储的键名 */
+const STORAGE_KEY = 'word-typing-progress';
+
+interface SavedProgress {
+  book: number;
+  chapter: number;
+  word: number;
+  correct: number;
+  total: number;
+  elapsed: number;
+}
+
+/** 数值限制在 [min, max] 区间 */
+function clamp(value: number, min: number, max: number) {
+  return Math.min(Math.max(value, min), max);
+}
+
+/** 读取本地保存的练习进度 */
+function readProgress(): SavedProgress | null {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (!raw) return null;
+    const data = JSON.parse(raw) as SavedProgress;
+    const fields = ['book', 'chapter', 'word', 'correct', 'total', 'elapsed'] as const;
+    if (!data || fields.some((key) => !Number.isFinite(data[key]))) return null;
+    return data;
+  } catch (e) {
+    return null;
+  }
+}
+
 export default function WordTyping() {
-  const [bookIndex, setBookIndex] = useState(0);
-  const [chapterIndex, setChapterIndex] = useState(0);
-  const [wordIndex, setWordIndex] = useState(0);
+  /** 首次渲染时读取本地进度，并校正到词库/章节的有效范围 */
+  const [initial] = useState(() => {
+    const saved = readProgress();
+    const book = clamp(saved?.book ?? 0, 0, books.length - 1);
+    const chapterList = chunkWords(books[book].words, WORDS_PER_CHAPTER);
+    const chapter = clamp(saved?.chapter ?? 0, 0, chapterList.length - 1);
+    const word = clamp(saved?.word ?? 0, 0, chapterList[chapter].length - 1);
+    return { saved, book, chapter, word };
+  });
+  const [bookIndex, setBookIndex] = useState(initial.book);
+  const [chapterIndex, setChapterIndex] = useState(initial.chapter);
+  const [wordIndex, setWordIndex] = useState(initial.word);
   /** 当前单词已正确输入的字符 */
   const [input, setInput] = useState('');
   /** 输错时对应的单词字母下标，短暂标红后恢复 */
@@ -149,8 +189,11 @@ export default function WordTyping() {
   const [shakeKey, setShakeKey] = useState(0);
   const [started, setStarted] = useState(false);
   const [paused, setPaused] = useState(false);
-  const [elapsed, setElapsed] = useState(0);
-  const [stats, setStats] = useState({ correct: 0, total: 0 });
+  const [elapsed, setElapsed] = useState(initial.saved?.elapsed ?? 0);
+  const [stats, setStats] = useState({
+    correct: initial.saved?.correct ?? 0,
+    total: initial.saved?.total ?? 0,
+  });
   const [pickerOpen, setPickerOpen] = useState(false);
 
   const errorTimer = useRef<number | undefined>(undefined);
@@ -169,6 +212,23 @@ export default function WordTyping() {
   }, [started, paused]);
 
   useEffect(() => () => window.clearTimeout(errorTimer.current), []);
+
+  /** 练习进度变化时自动保存到本地 */
+  useEffect(() => {
+    try {
+      const progress: SavedProgress = {
+        book: bookIndex,
+        chapter: chapterIndex,
+        word: wordIndex,
+        correct: stats.correct,
+        total: stats.total,
+        elapsed,
+      };
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(progress));
+    } catch (e) {
+      // 隐私模式等场景写入失败时忽略
+    }
+  }, [bookIndex, chapterIndex, wordIndex, stats.correct, stats.total, elapsed]);
 
   /** 切换到相邻单词，清空当前进度 */
   function moveWord(offset: number) {
