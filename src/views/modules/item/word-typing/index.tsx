@@ -30,8 +30,8 @@ export default function WordTyping() {
   const [wordIndex, setWordIndex] = useState(0);
   /** 当前单词已正确输入的字符 */
   const [input, setInput] = useState('');
-  /** 刚输错的字符，短暂标红后清空 */
-  const [wrongChar, setWrongChar] = useState('');
+  /** 输错时对应的单词字母下标，短暂标红后恢复 */
+  const [errorIndex, setErrorIndex] = useState<number | null>(null);
   /** 自增触发抖动动画重放 */
   const [shakeKey, setShakeKey] = useState(0);
   const [started, setStarted] = useState(false);
@@ -58,7 +58,7 @@ export default function WordTyping() {
   function moveWord(offset: number) {
     setWordIndex((i) => (i + offset + chapter.words.length) % chapter.words.length);
     setInput('');
-    setWrongChar('');
+    setErrorIndex(null);
   }
 
   /** 切换章节，重置本次练习数据 */
@@ -66,7 +66,7 @@ export default function WordTyping() {
     setChapterIndex(index);
     setWordIndex(0);
     setInput('');
-    setWrongChar('');
+    setErrorIndex(null);
     setStats({ correct: 0, total: 0 });
     setElapsed(0);
     setStarted(false);
@@ -97,12 +97,12 @@ export default function WordTyping() {
         return;
       }
 
-      // 输错：清空单词进度，标红错误字符并左右抖动
+      // 输错：清空单词进度，标红出错位置的字母并左右抖动（单词本身不变）
+      setErrorIndex(input.length);
       setInput('');
-      setWrongChar(key);
       setShakeKey((k) => k + 1);
       window.clearTimeout(errorTimer.current);
-      errorTimer.current = window.setTimeout(() => setWrongChar(''), 450);
+      errorTimer.current = window.setTimeout(() => setErrorIndex(null), 450);
     }
 
     window.addEventListener('keydown', onKeyDown);
@@ -166,23 +166,19 @@ export default function WordTyping() {
           </aside>
 
           <section class="wt-center">
-            <div class={classNames('wt-word', wrongChar && 'is-error')} key={shakeKey}>
-              {(wrongChar ? wrongChar + word.w.slice(1) : word.w)
-                .split('')
-                .map((char, index) => {
-                  if (wrongChar && index === 0) {
-                    return (
-                      <span key={index} class="wt-char wrong">
-                        {char}
-                      </span>
-                    );
-                  }
-                  return (
-                    <span key={index} class={classNames('wt-char', index < input.length && 'done')}>
-                      {char}
-                    </span>
-                  );
-                })}
+            <div class={classNames('wt-word', errorIndex !== null && 'is-error')} key={shakeKey}>
+              {word.w.split('').map((char, index) => (
+                <span
+                  key={index}
+                  class={classNames(
+                    'wt-char',
+                    index < input.length && 'done',
+                    index === errorIndex && 'wrong'
+                  )}
+                >
+                  {char}
+                </span>
+              ))}
               <button class="wt-icon-btn" title="朗读" onClick={() => speak(word.w)}>
                 <svg viewBox="0 0 24 24">
                   <path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3a4.5 4.5 0 0 0-2.5-4v8a4.5 4.5 0 0 0 2.5-4zM14 3.2v2.1a7 7 0 0 1 0 13.4v2.1a9 9 0 0 0 0-17.6z" />
