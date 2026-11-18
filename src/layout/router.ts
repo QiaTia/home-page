@@ -65,6 +65,10 @@ export default [
     path: '/webitem/typing',
     component: () => import('@/views/modules/item/typing')
   }, {
+    title: '单词打字练习',
+    path: '/webitem/word-typing',
+    component: () => import('@/views/modules/item/word-typing')
+  }, {
     title: 'TinyImage', 
     path: '/webitem/image/tiny',
     component: () => import('@/views/modules/image/tiny')

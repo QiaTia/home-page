@@ -67,6 +67,11 @@ export default function () {
       h: "/webitem/typing"
     },
     {
+      t: "单词打字练习",
+      d: "CET-4 / CET-6 词汇打字，打错清空进度并抖动",
+      h: "/webitem/word-typing"
+    },
+    {
       t: "GoTo",
       d: "输入地址或网络协议, 一键跳转!",
       h: '/webitem/goto'
