@@ -1,4 +1,5 @@
 // 等级考试词库：CET-4 / CET-6，含美式音标与中文释义
+// 数据来源：qwerty-learner 公开的 CET-4 / CET-6 词表（https://github.com/Kaiyiwing/qwerty-learner），清洗后生成
 export interface WordItem {
   /** 单词（小写字母） */
   w: string;

@@ -46,18 +46,49 @@ interface PickerProps {
 function BookPicker({ bookIndex, chapterIndex, onConfirm, onClose }: PickerProps) {
   const [activeBook, setActiveBook] = useState(bookIndex);
   const [activeChapter, setActiveChapter] = useState(chapterIndex);
+  const panelRef = useRef<HTMLDivElement>(null);
   const book = books[activeBook];
   const chapterCount = Math.ceil(book.words.length / WORDS_PER_CHAPTER);
 
+  /** 打开后把焦点移入弹窗，便于键盘与读屏操作 */
+  useEffect(() => {
+    panelRef.current?.focus();
+  }, []);
+
+  /** 将 Tab 焦点限制在弹窗内 */
+  function trapFocus(e: KeyboardEvent) {
+    if (e.key !== 'Tab') return;
+    const nodes = panelRef.current?.querySelectorAll<HTMLElement>('button');
+    if (!nodes || nodes.length === 0) return;
+    const first = nodes[0];
+    const last = nodes[nodes.length - 1];
+    if (e.shiftKey && document.activeElement === first) {
+      e.preventDefault();
+      last.focus();
+    } else if (!e.shiftKey && document.activeElement === last) {
+      e.preventDefault();
+      first.focus();
+    }
+  }
+
   return (
     <div class="wt-picker-mask" onClick={onClose}>
-      <div class="wt-picker" onClick={(e) => e.stopPropagation()}>
+      <div
+        class="wt-picker"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="wt-picker-title"
+        tabIndex={-1}
+        ref={panelRef}
+        onKeyDown={trapFocus}
+        onClick={(e) => e.stopPropagation()}
+      >
         <header class="wt-picker-head">
           <div>
-            <h3>选择词库</h3>
+            <h3 id="wt-picker-title">选择词库</h3>
             <p>选择考试词库与章节，开始本轮练习</p>
           </div>
-          <button class="wt-icon-btn muted" title="关闭" onClick={onClose}>
+          <button class="wt-icon-btn muted" title="关闭" aria-label="关闭" onClick={onClose}>
             <svg viewBox="0 0 24 24">
               <path d="M18.3 5.7 12 12l6.3 6.3-1.4 1.4L10.6 13.4 4.3 19.7 2.9 18.3 9.2 12 2.9 5.7 4.3 4.3l6.3 6.3 6.3-6.3z" />
             </svg>
@@ -75,6 +106,7 @@ function BookPicker({ bookIndex, chapterIndex, onConfirm, onClose }: PickerProps
               <button
                 key={item.key}
                 class={classNames('wt-book', active && 'active')}
+                aria-pressed={active}
                 onClick={() => {
                   setActiveBook(index);
                   setActiveChapter(0);
@@ -117,6 +149,7 @@ function BookPicker({ bookIndex, chapterIndex, onConfirm, onClose }: PickerProps
             <button
               key={index}
               class={classNames('wt-chapter-item', index === activeChapter && 'active')}
+              aria-pressed={index === activeChapter}
               onClick={() => setActiveChapter(index)}
             >
               {index + 1}
@@ -159,11 +192,22 @@ function readProgress(): SavedProgress | null {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
     if (!raw) return null;
-    const data = JSON.parse(raw) as SavedProgress;
+    const data = JSON.parse(raw) as Partial<SavedProgress>;
+    if (!data || typeof data !== 'object') return null;
     const fields = ['book', 'chapter', 'word', 'correct', 'total', 'elapsed'] as const;
-    if (!data || fields.some((key) => !Number.isFinite(data[key]))) return null;
-    return data;
-  } catch (e) {
+    if (fields.some((key) => !Number.isFinite(data[key]))) return null;
+    /** 统计值统一取整并保证非负，避免脏数据渲染出异常时间 */
+    const toCount = (value: number | undefined) => Math.max(0, Math.floor(value ?? 0));
+    const correct = toCount(data.correct);
+    return {
+      book: toCount(data.book),
+      chapter: toCount(data.chapter),
+      word: toCount(data.word),
+      correct,
+      total: Math.max(correct, toCount(data.total)),
+      elapsed: toCount(data.elapsed),
+    };
+  } catch {
     return null;
   }
 }
@@ -204,12 +248,12 @@ export default function WordTyping() {
   const prevWord = chapter[wordIndex - 1];
   const nextWord = chapter[(wordIndex + 1) % chapter.length];
 
-  /** 暂停或切换章节时停止计时 */
+  /** 暂停、打开词库弹窗时停止计时 */
   useEffect(() => {
-    if (!started || paused) return;
+    if (!started || paused || pickerOpen) return;
     const timer = window.setInterval(() => setElapsed((t) => t + 1), 1000);
     return () => window.clearInterval(timer);
-  }, [started, paused]);
+  }, [started, paused, pickerOpen]);
 
   useEffect(() => () => window.clearTimeout(errorTimer.current), []);
 
@@ -277,6 +321,9 @@ export default function WordTyping() {
       }));
 
       if (isCorrect) {
+        // 正确键入时清除上一次的报错标记，避免红字盖住已输入正确的字母
+        setErrorIndex(null);
+        window.clearTimeout(errorTimer.current);
         const next = input + key;
         if (next.length === word.w.length) moveWord(1);
         else setInput(next);
