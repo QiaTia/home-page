@@ -136,6 +136,15 @@
     filter: brightness(1.06);
   }
 
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+
+    &:hover {
+      filter: none;
+    }
+  }
+
   &.ghost {
     background: #ececf3;
     color: #6e6e80;
@@ -158,6 +167,58 @@
   align-items: center;
   gap: 12px;
   min-height: 320px;
+}
+
+.wt-loading {
+  grid-column: 1 / -1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 260px;
+  text-align: center;
+
+  .wt-loading-box {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 14px;
+  }
+
+  .wt-loading-text {
+    font-size: 14px;
+    color: var(--wt-muted);
+  }
+
+  .wt-loading-bar {
+    width: 160px;
+    height: 4px;
+    border-radius: 999px;
+    background: linear-gradient(90deg, var(--wt-primary-soft), var(--wt-primary), var(--wt-primary-soft));
+    background-size: 200% 100%;
+    animation: wt-loading 1.1s linear infinite;
+  }
+
+  .wt-load-error {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+
+    p {
+      margin: 0;
+      font-size: 14px;
+      color: var(--wt-muted);
+    }
+  }
+}
+
+@keyframes wt-loading {
+  from {
+    background-position: 200% 0;
+  }
+  to {
+    background-position: -200% 0;
+  }
 }
 
 .wt-side {

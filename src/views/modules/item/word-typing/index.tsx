@@ -1,6 +1,6 @@
 import classNames from 'classnames';
 import { useEffect, useMemo, useRef, useState } from 'preact/hooks';
-import { books } from './word_bank';
+import { books, getCachedBook, loadBook, type WordItem } from './books';
 import './index.less';
 
 /** 每章单词数 */
@@ -35,6 +35,16 @@ function chunkWords<T>(list: T[], size: number) {
   return result;
 }
 
+/** 章节数量，按索引中的词数推算，无需加载词表 */
+function chapterCountOf(book: { count: number }) {
+  return Math.ceil(book.count / WORDS_PER_CHAPTER);
+}
+
+/** 指定章节的词数 */
+function chapterSizeOf(book: { count: number }, chapterIndex: number) {
+  return Math.min(WORDS_PER_CHAPTER, book.count - chapterIndex * WORDS_PER_CHAPTER);
+}
+
 interface PickerProps {
   bookIndex: number;
   chapterIndex: number;
@@ -48,7 +58,7 @@ function BookPicker({ bookIndex, chapterIndex, onConfirm, onClose }: PickerProps
   const [activeChapter, setActiveChapter] = useState(chapterIndex);
   const panelRef = useRef<HTMLDivElement>(null);
   const book = books[activeBook];
-  const chapterCount = Math.ceil(book.words.length / WORDS_PER_CHAPTER);
+  const chapterCount = chapterCountOf(book);
 
   /** 打开后把焦点移入弹窗，便于键盘与读屏操作 */
   useEffect(() => {
@@ -124,7 +134,7 @@ function BookPicker({ bookIndex, chapterIndex, onConfirm, onClose }: PickerProps
                 </div>
                 <p class="wt-book-title">{item.title}</p>
                 <div class="wt-book-bottom">
-                  <span>{item.words.length} 词</span>
+                  <span>{item.count} 词</span>
                   <svg class="wt-book-icon" viewBox="0 0 48 40">
                     <rect x="4" y="12" width="7" height="24" rx="2" fill="#c9c8f5" />
                     <rect x="15" y="6" width="7" height="30" rx="2" fill="#f2c9b8" />
@@ -217,9 +227,8 @@ export default function WordTyping() {
   const [initial] = useState(() => {
     const saved = readProgress();
     const book = clamp(saved?.book ?? 0, 0, books.length - 1);
-    const chapterList = chunkWords(books[book].words, WORDS_PER_CHAPTER);
-    const chapter = clamp(saved?.chapter ?? 0, 0, chapterList.length - 1);
-    const word = clamp(saved?.word ?? 0, 0, chapterList[chapter].length - 1);
+    const chapter = clamp(saved?.chapter ?? 0, 0, chapterCountOf(books[book]) - 1);
+    const word = clamp(saved?.word ?? 0, 0, chapterSizeOf(books[book], chapter) - 1);
     return { saved, book, chapter, word };
   });
   const [bookIndex, setBookIndex] = useState(initial.book);
@@ -239,14 +248,26 @@ export default function WordTyping() {
     total: initial.saved?.total ?? 0,
   });
   const [pickerOpen, setPickerOpen] = useState(false);
+  /** 已加载的词表及其所属词库，未加载完成时为 null */
+  const [wordBook, setWordBook] = useState<{ key: string; list: WordItem[] } | null>(() => {
+    const key = books[initial.book].key;
+    const cached = getCachedBook(key);
+    return cached ? { key, list: cached } : null;
+  });
+  const [loadState, setLoadState] = useState<'loading' | 'ready' | 'error'>(
+    wordBook ? 'ready' : 'loading'
+  );
+  const [reloadKey, setReloadKey] = useState(0);
 
   const errorTimer = useRef<number | undefined>(undefined);
   const book = books[bookIndex];
-  const chapters = useMemo(() => chunkWords(book.words, WORDS_PER_CHAPTER), [book]);
+  /** 只有词表与当前词库一致时才视为可用，切换词库瞬间不会闪现旧词 */
+  const words = wordBook?.key === book.key ? wordBook.list : null;
+  const chapters = useMemo(() => (words ? chunkWords(words, WORDS_PER_CHAPTER) : []), [words]);
   const chapter = chapters[chapterIndex] ?? chapters[0];
-  const word = chapter[wordIndex] ?? chapter[0];
-  const prevWord = chapter[wordIndex - 1];
-  const nextWord = chapter[(wordIndex + 1) % chapter.length];
+  const word = chapter?.[wordIndex];
+  const prevWord = chapter?.[wordIndex - 1];
+  const nextWord = chapter ? chapter[(wordIndex + 1) % chapter.length] : undefined;
 
   /** 暂停、打开词库弹窗时停止计时 */
   useEffect(() => {
@@ -274,8 +295,46 @@ export default function WordTyping() {
     }
   }, [bookIndex, chapterIndex, wordIndex, stats.correct, stats.total, elapsed]);
 
+  /** 按需加载当前词库的词表 */
+  useEffect(() => {
+    const key = books[bookIndex].key;
+    const cached = getCachedBook(key);
+    if (cached) {
+      setWordBook({ key, list: cached });
+      setLoadState('ready');
+      return;
+    }
+
+    let alive = true;
+    setWordBook(null);
+    setLoadState('loading');
+    loadBook(key)
+      .then((list) => {
+        if (!alive) return;
+        setWordBook({ key, list });
+        setLoadState('ready');
+      })
+      .catch(() => {
+        if (alive) setLoadState('error');
+      });
+
+    return () => {
+      alive = false;
+    };
+  }, [bookIndex, reloadKey]);
+
+  /** 词表加载后校正章节与单词下标，避免存档超出实际范围 */
+  useEffect(() => {
+    if (chapters.length === 0) return;
+    const safeChapter = Math.min(chapterIndex, chapters.length - 1);
+    const safeWord = Math.min(wordIndex, chapters[safeChapter].length - 1);
+    if (safeChapter !== chapterIndex) setChapterIndex(safeChapter);
+    if (safeWord !== wordIndex) setWordIndex(safeWord);
+  }, [chapters, chapterIndex, wordIndex]);
+
   /** 切换到相邻单词，清空当前进度 */
   function moveWord(offset: number) {
+    if (!chapter) return;
     setWordIndex((i) => (i + offset + chapter.length) % chapter.length);
     setInput('');
     setErrorIndex(null);
@@ -306,6 +365,7 @@ export default function WordTyping() {
         if (e.key === 'Escape') setPickerOpen(false);
         return;
       }
+      if (!word) return;
       if (!isLetterKey(e)) return;
       e.preventDefault();
       if (!started) setStarted(true);
@@ -345,7 +405,7 @@ export default function WordTyping() {
   const minutes = elapsed / 60;
   const wpm = minutes > 0 ? Math.round(stats.correct / 5 / minutes) : 0;
   const accuracy = stats.total > 0 ? Math.round((stats.correct / stats.total) * 100) : 0;
-  const progress = Math.round((input.length / word.w.length) * 100);
+  const progress = word ? Math.round((input.length / word.w.length) * 100) : 0;
 
   return (
     <div class="wt-page">
@@ -358,7 +418,12 @@ export default function WordTyping() {
             </svg>
           </button>
           <span class="wt-accent">美音</span>
-          <button class="wt-icon-btn" title="朗读单词" onClick={() => speak(word.w)}>
+          <button
+            class="wt-icon-btn"
+            title="朗读单词"
+            disabled={!word}
+            onClick={() => word && speak(word.w)}
+          >
             <svg viewBox="0 0 24 24">
               <path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3a4.5 4.5 0 0 0-2.5-4v8a4.5 4.5 0 0 0 2.5-4zM14 3.2v2.1a7 7 0 0 1 0 13.4v2.1a9 9 0 0 0 0-17.6z" />
             </svg>
@@ -367,6 +432,7 @@ export default function WordTyping() {
           <div class="wt-actions">
             <button
               class={classNames('wt-btn', (started || paused) && 'ghost')}
+              disabled={!word}
               onClick={() => {
                 if (!started) {
                   setStarted(true);
@@ -378,73 +444,93 @@ export default function WordTyping() {
             >
               {!started ? 'Start' : paused ? '继续' : 'Pause'}
             </button>
-            <button class="wt-btn skip" onClick={() => moveWord(1)}>
+            <button class="wt-btn skip" disabled={!word} onClick={() => moveWord(1)}>
               Skip
             </button>
           </div>
         </header>
 
         <main class="wt-stage">
-          <aside class="wt-side prev">
-            <span class="arrow">←</span>
-            <div class="wt-side-body">
-              <div class="wt-side-word">{prevWord?.w ?? ''}</div>
-              <div class="wt-side-trans">{prevWord?.t ?? ''}</div>
-            </div>
-          </aside>
+          {word ? (
+            <>
+              <aside class="wt-side prev">
+                <span class="arrow">←</span>
+                <div class="wt-side-body">
+                  <div class="wt-side-word">{prevWord?.w ?? ''}</div>
+                  <div class="wt-side-trans">{prevWord?.t ?? ''}</div>
+                </div>
+              </aside>
 
-          <section class="wt-center">
-            <div class={classNames('wt-word', errorIndex !== null && 'is-error')} key={shakeKey}>
-              {word.w.split('').map((char, index) => (
-                <span
-                  key={index}
-                  class={classNames(
-                    'wt-char',
-                    index < input.length && 'done',
-                    index === errorIndex && 'wrong'
-                  )}
-                >
-                  {char}
-                </span>
-              ))}
-              <button class="wt-icon-btn" title="朗读" onClick={() => speak(word.w)}>
-                <svg viewBox="0 0 24 24">
-                  <path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3a4.5 4.5 0 0 0-2.5-4v8a4.5 4.5 0 0 0 2.5-4zM14 3.2v2.1a7 7 0 0 1 0 13.4v2.1a9 9 0 0 0 0-17.6z" />
-                </svg>
-              </button>
-            </div>
-            <div class="wt-phonetic">AmE: [{word.p}]</div>
-            <div class="wt-trans">{word.t}</div>
-            <div class="wt-tools">
-              <button class="wt-icon-btn" title="重新朗读" onClick={() => speak(word.w)}>
-                <svg viewBox="0 0 24 24">
-                  <path d="M12 5V1L7 6l5 5V7a6 6 0 1 1-6 6H4a8 8 0 1 0 8-8z" />
-                </svg>
-              </button>
-              <button class="wt-icon-btn" title="换一个" onClick={() => moveWord(1)}>
-                <svg viewBox="0 0 24 24">
-                  <path d="M7.5 5.6 3 12l4.5 6.4 1.6-1.1L5.5 12l3.6-5.3-1.6-1.1zm9 0-1.6 1.1L18.5 12l-3.6 5.3 1.6 1.1L21 12l-4.5-6.4zM12 3h-2l3 18h2l-3-18z" />
-                </svg>
-              </button>
-            </div>
-            <div class="wt-progress">
-              <i style={{ width: `${progress}%` }} />
-            </div>
+              <section class="wt-center">
+                <div class={classNames('wt-word', errorIndex !== null && 'is-error')} key={shakeKey}>
+                  {word.w.split('').map((char, index) => (
+                    <span
+                      key={index}
+                      class={classNames(
+                        'wt-char',
+                        index < input.length && 'done',
+                        index === errorIndex && 'wrong'
+                      )}
+                    >
+                      {char}
+                    </span>
+                  ))}
+                  <button class="wt-icon-btn" title="朗读" onClick={() => speak(word.w)}>
+                    <svg viewBox="0 0 24 24">
+                      <path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3a4.5 4.5 0 0 0-2.5-4v8a4.5 4.5 0 0 0 2.5-4zM14 3.2v2.1a7 7 0 0 1 0 13.4v2.1a9 9 0 0 0 0-17.6z" />
+                    </svg>
+                  </button>
+                </div>
+                <div class="wt-phonetic">AmE: [{word.p}]</div>
+                <div class="wt-trans">{word.t}</div>
+                <div class="wt-tools">
+                  <button class="wt-icon-btn" title="重新朗读" onClick={() => speak(word.w)}>
+                    <svg viewBox="0 0 24 24">
+                      <path d="M12 5V1L7 6l5 5V7a6 6 0 1 1-6 6H4a8 8 0 1 0 8-8z" />
+                    </svg>
+                  </button>
+                  <button class="wt-icon-btn" title="换一个" onClick={() => moveWord(1)}>
+                    <svg viewBox="0 0 24 24">
+                      <path d="M7.5 5.6 3 12l4.5 6.4 1.6-1.1L5.5 12l3.6-5.3-1.6-1.1zm9 0-1.6 1.1L18.5 12l-3.6 5.3 1.6 1.1L21 12l-4.5-6.4zM12 3h-2l3 18h2l-3-18z" />
+                    </svg>
+                  </button>
+                </div>
+                <div class="wt-progress">
+                  <i style={{ width: `${progress}%` }} />
+                </div>
 
-            {!started && (
-              <div class="wt-mask" onClick={() => setStarted(true)}>
-                按任意键继续
-              </div>
-            )}
-          </section>
+                {!started && (
+                  <div class="wt-mask" onClick={() => setStarted(true)}>
+                    按任意键继续
+                  </div>
+                )}
+              </section>
 
-          <aside class="wt-side next">
-            <div class="wt-side-body">
-              <div class="wt-side-word">{nextWord.w}</div>
-              <div class="wt-side-trans">{nextWord.t}</div>
-            </div>
-            <span class="arrow">→</span>
-          </aside>
+              <aside class="wt-side next">
+                <div class="wt-side-body">
+                  <div class="wt-side-word">{nextWord?.w ?? ''}</div>
+                  <div class="wt-side-trans">{nextWord?.t ?? ''}</div>
+                </div>
+                <span class="arrow">→</span>
+              </aside>
+            </>
+          ) : (
+            <section class="wt-center wt-loading" aria-busy={loadState === 'loading'}>
+              {loadState === 'error' ? (
+                <div class="wt-load-error" role="alert">
+                  <p>词库加载失败，请检查网络后重试</p>
+                  <button class="wt-btn" onClick={() => setReloadKey((key) => key + 1)}>
+                    重试
+                  </button>
+                </div>
+              ) : (
+                <div class="wt-loading-box">
+                  <span class="wt-loading-text">词库加载中…</span>
+                  <span class="wt-loading-bar" />
+                </div>
+              )}
+            </section>
+          )}
         </main>
 
         <footer class="wt-stats">
