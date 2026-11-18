@@ -1,7 +1,10 @@
 import classNames from 'classnames';
-import { useEffect, useRef, useState } from 'preact/hooks';
-import { chapters } from './word_bank';
+import { useEffect, useMemo, useRef, useState } from 'preact/hooks';
+import { books } from './word_bank';
 import './index.less';
+
+/** 每章单词数 */
+const WORDS_PER_CHAPTER = 20;
 
 /** 判断是否为需要参与输入的字母键 */
 function isLetterKey(e: KeyboardEvent) {
@@ -25,7 +28,117 @@ function formatTime(seconds: number) {
   return `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
 }
 
+/** 按固定数量切分章节 */
+function chunkWords<T>(list: T[], size: number) {
+  const result: T[][] = [];
+  for (let i = 0; i < list.length; i += size) result.push(list.slice(i, i + size));
+  return result;
+}
+
+interface PickerProps {
+  bookIndex: number;
+  chapterIndex: number;
+  onConfirm: (book: number, chapter: number) => void;
+  onClose: () => void;
+}
+
+/** 词库与章节选择面板 */
+function BookPicker({ bookIndex, chapterIndex, onConfirm, onClose }: PickerProps) {
+  const [activeBook, setActiveBook] = useState(bookIndex);
+  const [activeChapter, setActiveChapter] = useState(chapterIndex);
+  const book = books[activeBook];
+  const chapterCount = Math.ceil(book.words.length / WORDS_PER_CHAPTER);
+
+  return (
+    <div class="wt-picker-mask" onClick={onClose}>
+      <div class="wt-picker" onClick={(e) => e.stopPropagation()}>
+        <header class="wt-picker-head">
+          <div>
+            <h3>选择词库</h3>
+            <p>选择考试词库与章节，开始本轮练习</p>
+          </div>
+          <button class="wt-icon-btn muted" title="关闭" onClick={onClose}>
+            <svg viewBox="0 0 24 24">
+              <path d="M18.3 5.7 12 12l6.3 6.3-1.4 1.4L10.6 13.4 4.3 19.7 2.9 18.3 9.2 12 2.9 5.7 4.3 4.3l6.3 6.3 6.3-6.3z" />
+            </svg>
+          </button>
+        </header>
+
+        <div class="wt-picker-tabs">
+          <span class="active">大学英语</span>
+        </div>
+
+        <div class="wt-books">
+          {books.map((item, index) => {
+            const active = index === activeBook;
+            return (
+              <button
+                key={item.key}
+                class={classNames('wt-book', active && 'active')}
+                onClick={() => {
+                  setActiveBook(index);
+                  setActiveChapter(0);
+                }}
+              >
+                <div class="wt-book-top">
+                  <strong>{item.short}</strong>
+                  <span class="wt-book-check">
+                    {active && (
+                      <svg viewBox="0 0 24 24">
+                        <path d="M9.5 16.2 5.3 12l-1.4 1.4 5.6 5.6L20.1 8.4 18.7 7z" />
+                      </svg>
+                    )}
+                  </span>
+                </div>
+                <p class="wt-book-title">{item.title}</p>
+                <div class="wt-book-bottom">
+                  <span>{item.words.length} 词</span>
+                  <svg class="wt-book-icon" viewBox="0 0 48 40">
+                    <rect x="4" y="12" width="7" height="24" rx="2" fill="#c9c8f5" />
+                    <rect x="15" y="6" width="7" height="30" rx="2" fill="#f2c9b8" />
+                    <rect x="26" y="16" width="7" height="20" rx="2" fill="#bfe3cd" />
+                    <rect x="37" y="9" width="7" height="27" rx="2" fill="#d8d4ef" />
+                  </svg>
+                </div>
+              </button>
+            );
+          })}
+        </div>
+
+        <div class="wt-chapters-head">
+          <span>选择章节</span>
+          <span>
+            共 {chapterCount} 章 · 每章 {WORDS_PER_CHAPTER} 词
+          </span>
+        </div>
+
+        <div class="wt-chapter-grid">
+          {Array.from({ length: chapterCount }, (_, index) => (
+            <button
+              key={index}
+              class={classNames('wt-chapter-item', index === activeChapter && 'active')}
+              onClick={() => setActiveChapter(index)}
+            >
+              {index + 1}
+            </button>
+          ))}
+        </div>
+
+        <footer class="wt-picker-foot">
+          <button class="wt-btn ghost" onClick={onClose}>
+            取消
+          </button>
+          <button class="wt-btn" onClick={() => onConfirm(activeBook, activeChapter)}>
+            开始练习
+          </button>
+        </footer>
+      </div>
+    </div>
+  );
+}
+
 export default function WordTyping() {
+  const [bookIndex, setBookIndex] = useState(0);
   const [chapterIndex, setChapterIndex] = useState(0);
   const [wordIndex, setWordIndex] = useState(0);
   /** 当前单词已正确输入的字符 */
@@ -38,12 +151,15 @@ export default function WordTyping() {
   const [paused, setPaused] = useState(false);
   const [elapsed, setElapsed] = useState(0);
   const [stats, setStats] = useState({ correct: 0, total: 0 });
+  const [pickerOpen, setPickerOpen] = useState(false);
 
   const errorTimer = useRef<number | undefined>(undefined);
-  const chapter = chapters[chapterIndex];
-  const word = chapter.words[wordIndex];
-  const prevWord = chapter.words[wordIndex - 1];
-  const nextWord = chapter.words[(wordIndex + 1) % chapter.words.length];
+  const book = books[bookIndex];
+  const chapters = useMemo(() => chunkWords(book.words, WORDS_PER_CHAPTER), [book]);
+  const chapter = chapters[chapterIndex] ?? chapters[0];
+  const word = chapter[wordIndex] ?? chapter[0];
+  const prevWord = chapter[wordIndex - 1];
+  const nextWord = chapter[(wordIndex + 1) % chapter.length];
 
   /** 暂停或切换章节时停止计时 */
   useEffect(() => {
@@ -56,14 +172,13 @@ export default function WordTyping() {
 
   /** 切换到相邻单词，清空当前进度 */
   function moveWord(offset: number) {
-    setWordIndex((i) => (i + offset + chapter.words.length) % chapter.words.length);
+    setWordIndex((i) => (i + offset + chapter.length) % chapter.length);
     setInput('');
     setErrorIndex(null);
   }
 
-  /** 切换章节，重置本次练习数据 */
-  function changeChapter(index: number) {
-    setChapterIndex(index);
+  /** 重置本轮练习数据 */
+  function resetSession() {
     setWordIndex(0);
     setInput('');
     setErrorIndex(null);
@@ -73,10 +188,21 @@ export default function WordTyping() {
     setPaused(false);
   }
 
+  /** 应用词库与章节选择 */
+  function applySelection(nextBook: number, nextChapter: number) {
+    setBookIndex(nextBook);
+    setChapterIndex(nextChapter);
+    setPickerOpen(false);
+    resetSession();
+  }
+
   useEffect(() => {
     function onKeyDown(e: KeyboardEvent) {
+      if (pickerOpen) {
+        if (e.key === 'Escape') setPickerOpen(false);
+        return;
+      }
       if (!isLetterKey(e)) return;
-      if ((e.target as HTMLElement)?.tagName === 'SELECT') return;
       e.preventDefault();
       if (!started) setStarted(true);
       if (paused) return;
@@ -107,7 +233,7 @@ export default function WordTyping() {
 
     window.addEventListener('keydown', onKeyDown);
     return () => window.removeEventListener('keydown', onKeyDown);
-  }, [word, input, started, paused, chapterIndex]);
+  }, [word, input, started, paused, pickerOpen]);
 
   const minutes = elapsed / 60;
   const wpm = minutes > 0 ? Math.round(stats.correct / 5 / minutes) : 0;
@@ -118,17 +244,12 @@ export default function WordTyping() {
     <div class="wt-page">
       <div class="wt-shell">
         <header class="wt-topbar">
-          <select
-            class="wt-chapter"
-            value={chapterIndex}
-            onChange={(e) => changeChapter(Number((e.target as HTMLSelectElement).value))}
-          >
-            {chapters.map((item, index) => (
-              <option key={index} value={index}>
-                {item.level} {item.name}
-              </option>
-            ))}
-          </select>
+          <button class="wt-chapter" onClick={() => setPickerOpen(true)}>
+            {book.short} · 第 {chapterIndex + 1} 章
+            <svg class="wt-chevron" viewBox="0 0 24 24">
+              <path d="M7 10l5 5 5-5z" />
+            </svg>
+          </button>
           <span class="wt-accent">美音</span>
           <button class="wt-icon-btn" title="朗读单词" onClick={() => speak(word.w)}>
             <svg viewBox="0 0 24 24">
@@ -242,6 +363,15 @@ export default function WordTyping() {
           </div>
         </footer>
       </div>
+
+      {pickerOpen && (
+        <BookPicker
+          bookIndex={bookIndex}
+          chapterIndex={chapterIndex}
+          onConfirm={applySelection}
+          onClose={() => setPickerOpen(false)}
+        />
+      )}
     </div>
   );
 }
