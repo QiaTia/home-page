@@ -1,14 +1,14 @@
 import { DebounceClass } from "@/utils/utils";
 import classNames from "classnames";
 import { useEffect, useState } from "preact/hooks";
-import { JSXInternal } from "preact/src/jsx";
-import { React } from "@/layout/typings";
+import type { CSSProperties } from "preact";
+import type { React } from "@/layout/typings";
 
 type SizeEnum = 'default'|'small'|'large'
 
 
 interface SpinProps { 
-  style?: JSXInternal.CSSProperties, 
+  style?: CSSProperties, 
   size?: SizeEnum,
   spinning?: boolean;
   tip?: React.ReactNode;

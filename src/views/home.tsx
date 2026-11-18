@@ -1,6 +1,6 @@
 import Button from '@/components/Button';
 import { CodepenCircleOutlined, GithubOutlined, SlackOutlined } from '@ant-design/icons';
-import { route } from 'preact-router';
+import { route } from '@/layout/hash-router';
 
 export default function Home() {
   const groupList = [

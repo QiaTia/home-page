@@ -1,4 +1,4 @@
-import { route } from 'preact-router';
+import { route } from '@/layout/hash-router';
 import List from '@/components/List';
 /** 懒加载数据 */
 import './layout.less';

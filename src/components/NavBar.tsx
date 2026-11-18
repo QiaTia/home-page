@@ -2,11 +2,10 @@ import type { RouterProp } from "@/layout/reducer";
 
 import { RouterContext } from "@/layout/index";
 import classNames from "classnames";
-import { useContext, useEffect, useState } from "preact/hooks";
+import { useContext, useEffect, useRef, useState } from "preact/hooks";
 import Menu from "./Menu/index";
-import { route } from "preact-router";
-import { createRef } from "preact";
-import { React } from '@/layout/typings';
+import { route } from "@/layout/hash-router";
+import type { React } from '@/layout/typings';
 import Switch from "./Switch";
 import { setTheme } from "@/utils/utils";
 import { SunIcon, MoonIcon } from './Icon';
@@ -37,11 +36,11 @@ export default function (props: NavBarProps) {
     if(currentIndex != -1 && currentIndex != defaultIndex) setDefaultIndex(currentIndex);
   }, [router]);
   /** RefMenu */
-  const menuRef = createRef<any>();
+  const menuRef = useRef<any>(null);
   useEffect(() => {
-    const baseEl = menuRef.current.base as HTMLElement;
-    setSeatHeight(baseEl.offsetHeight);
-  }, [menuRef]);
+    const baseEl = menuRef.current as HTMLElement | null;
+    if (baseEl) setSeatHeight(baseEl.offsetHeight);
+  }, []);
   useEffect(() => {
     isLight = setTheme() == 'light';
   },[])

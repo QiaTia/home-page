@@ -1,7 +1,5 @@
 import Footer from "@/components/Footer";
-import Router from "preact-router";
-import AsyncRoute from "preact-async-route";
-import { createHashHistory, createBrowserHistory } from "history";
+import Router from "./hash-router";
 import { useReducer, useState, useEffect } from "preact/hooks";
 import routers from "./router";
 import { scrollTo } from "@/utils/utils";
@@ -18,8 +16,9 @@ export const RouterContext = createContext<RouterProp>(initState);
 
 const FixedPathList = MenuList.map((item) => item.path);
 
-/** hash 路由历史实例: 只创建一次, 避免每次渲染重新订阅导致路由抖动 */
-const hashHistory = createHashHistory();
+routers.forEach((route) => {
+  if (route.title) titleList.set(route.path, route.title);
+});
 
 /**
  * @description 遍历获取播放器元素
@@ -70,7 +69,13 @@ export default function Layout() {
       </div>
       <NavBar fixed={isFixed} />
       <Router
-        history={hashHistory}
+        routes={routers}
+        loading={
+          <div style={{ margin: "8em 0" }} className="flex-algin">
+            {" "}
+            <Spin />
+          </div>
+        }
         onChange={function (e) {
           // 暂时注释在线服务
           // getTia().then(tia => tia.style.fontSize = `${e.url == '/' ? 18 : 16}px`);
@@ -83,28 +88,7 @@ export default function Layout() {
             payload: { url: e.url, previous: e.previous, title: title },
           });
         }}
-      >
-        {routers.map((route) => {
-          const path = route.path;
-          if (route.title) titleList.set(route.path, route.title);
-          if (route.component.name !== "component")
-            // @ts-ignore
-            return <route.component path={path} />;
-          else
-            return (
-              <AsyncRoute
-                path={path}
-                loading={() => (
-                  <div style={{ margin: "8em 0" }} className="flex-algin">
-                    {" "}
-                    <Spin />
-                  </div>
-                )}
-                getComponent={async () => ((await route.component()) as any).default}
-              />
-            );
-        })}
-      </Router>
+      />
       <BackTop />
       {/* <ul className="animo-wrap">
         {

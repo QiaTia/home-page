@@ -1,11 +1,11 @@
 import classNames from "classnames";
 import { createRef, RefObject } from "preact";
 import { forwardRef, useEffect } from "preact/compat";
-import { JSXInternal } from "preact/src/jsx";
+import type { HTMLAttributes } from "preact";
 
 type InputProp = {
   autoSize?: Record<'maxRows'|'minRows', number|undefined> | boolean
-} & JSXInternal.HTMLAttributes<HTMLTextAreaElement>;
+} & HTMLAttributes<HTMLTextAreaElement>;
 
 function TextArea (props: InputProp) {
   const { ref, style, className, value, autoSize, ...inputProps } = props;

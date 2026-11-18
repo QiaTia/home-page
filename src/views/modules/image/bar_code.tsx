@@ -5,7 +5,7 @@ import Dragger from "@/components/Upload/dragger";
 import tiaBus, { defaultBusEvent } from "@/store/bus";
 import { useEffect, useState } from "preact/hooks"
 import './tiny.less';
-import { writeBarcode, type WriterOptions, prepareZXingModule, readBarcodes, type ReaderOptions  } from "zxing-wasm";
+import { writeBarcode, type WriterOptions, readBarcodes, type ReaderOptions  } from "zxing-wasm";
 import notify from "@/utils/notify";
 import { copy2Clipboard } from "@/utils/utils";
 // import { addScript } from "@/utils/utils";
@@ -20,16 +20,7 @@ const readerOptions: ReaderOptions = {
   maxNumberOfSymbols: 1,
 };
 
-prepareZXingModule({
-  overrides: {
-    locateFile(path: string, prefix: string) {
-      if (path.endsWith(".wasm")) {
-        return `https://unpkg.com/zxing-wasm@2.1.2/dist/full/${path}`;
-      }
-      return prefix + path;
-    },
-  },
-});
+// zxing-wasm 3.x 默认按自身版本从 CDN 拉取 wasm，无需手动覆盖 locateFile
 
 function barCode() {
   const [ defaultValue, setValue ] = useState<string>('')

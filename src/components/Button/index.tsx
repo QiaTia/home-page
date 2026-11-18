@@ -3,7 +3,7 @@ import { useEffect, useState } from 'preact/hooks';
 import { tuple } from '../__util/type';
 import classNames from 'classnames';
 import LoadingIcon from './LoadingIcon';
-import { React } from "@/layout/typings";
+import type { React } from "@/layout/typings";
 import { CSSProperties, forwardRef } from 'preact/compat';
 import './index.less';
 
