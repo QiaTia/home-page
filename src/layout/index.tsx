@@ -1,12 +1,10 @@
 import Footer from "@/components/Footer";
-import { getDsapi } from "@/serves/api";
-import notify from "@/utils/notify";
 import Router from "preact-router";
 import AsyncRoute from "preact-async-route";
 import { createHashHistory, createBrowserHistory } from "history";
 import { useReducer, useState, useEffect } from "preact/hooks";
 import routers from "./router";
-import { scrollTo, textToSound } from "@/utils/utils";
+import { scrollTo } from "@/utils/utils";
 import BackTop from "@/components/BackTop/";
 import Spin from "@/components/Spin/index";
 import { initState, reducer, RouterProp } from "./reducer";
@@ -42,24 +40,6 @@ function getTia(): Promise<HTMLDivElement> {
 export default function Layout() {
   const [currentRouter, dispatchRouter] = useReducer(reducer, initState);
   const [isFixed, seFixed] = useState(true);
-  function getAPI() {
-    getDsapi().then(({ data }) => {
-      notify({
-        content: data.note,
-        title: data.content,
-        duration: 0,
-        actions: [
-          {
-            name: "朗读",
-            onClick() {
-              textToSound(data.content);
-              return true;
-            },
-          },
-        ],
-      });
-    });
-  }
   function onPaste(ev: ClipboardEvent) {
     ev.preventDefault();
     ev.stopPropagation();
@@ -80,7 +60,6 @@ export default function Layout() {
   }
   // 暂时注释在线服务
   useEffect(() => {
-    getAPI();
     document.body.addEventListener("paste", onPaste);
   }, []);
   return (
