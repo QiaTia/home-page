@@ -27,10 +27,10 @@ const LoadingIcon = ({ prefixCls, loading, existIcon }:LoadingIconProps) => {
   }
   const [ style, setStyle ] = useState(getCollapsedWidth());
 
-  const ref = createRef();
+  const ref = createRef<HTMLSpanElement>();
 
   useEffect(() => {
-    setStyle(visible ? getRealWidth(ref.current) : getCollapsedWidth());
+    setStyle(visible && ref.current ? getRealWidth(ref.current) : getCollapsedWidth());
   }, [ref, visible]);
 
   return (

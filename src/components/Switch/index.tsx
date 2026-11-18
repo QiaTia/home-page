@@ -1,7 +1,7 @@
 import type { React } from '@/layout/typings';
 import classNames from 'classnames';
 import { forwardRef, useEffect, useState } from 'preact/compat';
-import type { HTMLAttributes } from "preact";
+import type { ButtonHTMLAttributes } from "preact";
 import './index.less';
 
 type BaseSwitchProps =  {
@@ -10,7 +10,7 @@ type BaseSwitchProps =  {
   className?: string,
   onNode?: React.ReactNode,
   offNode?: React.ReactNode,
-} & HTMLAttributes<HTMLButtonElement>;
+} & ButtonHTMLAttributes<HTMLButtonElement>;
 
 function Switch(props: BaseSwitchProps) {
   const { onClick, onNode, offNode, className, current: defaultValue, onChange, ...btnProps } = props;
