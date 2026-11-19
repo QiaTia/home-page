@@ -31,11 +31,11 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@main
-      # 使用 node:16
+      # Vite 8 / rolldown 要求 Node ^20.19.0 || >=22.12.0
       - name: use Node
         uses: actions/setup-node@v4
         with:
-          node-version: '18.x'
+          node-version: '22.x'
       # npm install & build
       - name: pnpm install and build
         run: |

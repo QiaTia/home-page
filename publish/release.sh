@@ -11,10 +11,10 @@ execSCP(){
 
 echo "==================== Build Code ===================="
 
-npx vite build
-if [ $? -ne 0 ];then 
+if ! npx vite build; then
   echo "Build Fail！"
-else
-  echo "====================打包完成===================="
-execSCP
+  exit 1
 fi
+
+echo "====================打包完成===================="
+execSCP
