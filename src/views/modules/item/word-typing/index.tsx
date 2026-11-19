@@ -6,9 +6,9 @@ import './index.less';
 /** 每章单词数 */
 const WORDS_PER_CHAPTER = 20;
 
-/** 判断是否为需要参与输入的字母键 */
-function isLetterKey(e: KeyboardEvent) {
-  return /^[a-zA-Z]$/.test(e.key) && !e.ctrlKey && !e.metaKey && !e.altKey;
+/** 判断是否为需要参与输入的字符键（字母、空格、连字符、撇号、句点，兼容短语） */
+function isTypingKey(e: KeyboardEvent) {
+  return /^[a-zA-Z .'\-]$/.test(e.key) && !e.ctrlKey && !e.metaKey && !e.altKey;
 }
 
 /** 朗读单词（美音） */
@@ -106,7 +106,7 @@ function BookPicker({ bookIndex, chapterIndex, onConfirm, onClose }: PickerProps
         </header>
 
         <div class="wt-picker-tabs">
-          <span class="active">大学英语</span>
+          <span class="active">全部词库</span>
         </div>
 
         <div class="wt-books">
@@ -382,7 +382,7 @@ export default function WordTyping() {
         return;
       }
       if (!word) return;
-      if (!isLetterKey(e)) return;
+      if (!isTypingKey(e)) return;
       e.preventDefault();
       if (!started) setStarted(true);
       if (paused) return;
@@ -484,6 +484,7 @@ export default function WordTyping() {
                       key={index}
                       class={classNames(
                         'wt-char',
+                        char === ' ' && 'space',
                         index < input.length && 'done',
                         index === errorIndex && 'wrong'
                       )}
@@ -497,7 +498,7 @@ export default function WordTyping() {
                     </svg>
                   </button>
                 </div>
-                <div class="wt-phonetic">AmE: [{word.p}]</div>
+                {word.p && <div class="wt-phonetic">AmE: [{word.p}]</div>}
                 <div class="wt-trans">{word.t}</div>
                 <div class="wt-tools">
                   <button class="wt-icon-btn" title="重新朗读" onClick={() => speak(word.w)}>
