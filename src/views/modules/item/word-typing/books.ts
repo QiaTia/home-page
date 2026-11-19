@@ -9,6 +9,8 @@ export interface WordItem {
   t: string;
   /** 美式音标 */
   p: string;
+  /** 教材自然章节名，缺省时按固定词数切分（CET 词库没有章节概念） */
+  c?: string;
 }
 
 export interface BookMeta {
@@ -21,6 +23,10 @@ export interface BookMeta {
   desc: string;
   /** 词数 */
   count: number;
+  /** 分类：大学英语 / 高中英语（人教版） */
+  group: 'cet' | 'gz';
+  /** 教材自然章节数，设置后章节按教材单元划分 */
+  chapters?: number;
 }
 
 /** 词库索引：进入页面即可渲染，无需下载词表 */
@@ -31,6 +37,7 @@ export const books: BookMeta[] = [
     title: '大学英语四级词库',
     desc: 'CET-4 核心词汇，覆盖四级高频考点',
     count: 2602,
+    group: 'cet',
   },
   {
     key: 'CET6',
@@ -38,6 +45,7 @@ export const books: BookMeta[] = [
     title: '大学英语六级词库',
     desc: 'CET-6 核心词汇，进阶阅读与写作',
     count: 2340,
+    group: 'cet',
   },
   {
     key: 'GZ-B1',
@@ -45,6 +53,8 @@ export const books: BookMeta[] = [
     title: '人教版高中英语必修第一册',
     desc: 'Welcome Unit 至 Unit 5，含课标词与短语',
     count: 383,
+    group: 'gz',
+    chapters: 6,
   },
   {
     key: 'GZ-B2',
@@ -52,6 +62,8 @@ export const books: BookMeta[] = [
     title: '人教版高中英语必修第二册',
     desc: 'Unit 1 至 Unit 5，含课标词与短语',
     count: 401,
+    group: 'gz',
+    chapters: 5,
   },
   {
     key: 'GZ-B3',
@@ -59,6 +71,8 @@ export const books: BookMeta[] = [
     title: '人教版高中英语必修第三册',
     desc: 'Unit 1 至 Unit 5，含课标词与短语',
     count: 471,
+    group: 'gz',
+    chapters: 5,
   },
   {
     key: 'GZ-X1',
@@ -66,6 +80,8 @@ export const books: BookMeta[] = [
     title: '人教版高中英语选择性必修第一册',
     desc: 'Unit 1 至 Unit 5，含课标词与短语',
     count: 386,
+    group: 'gz',
+    chapters: 5,
   },
   {
     key: 'GZ-X2',
@@ -73,6 +89,8 @@ export const books: BookMeta[] = [
     title: '人教版高中英语选择性必修第二册',
     desc: 'Unit 1 至 Unit 5，含课标词与短语',
     count: 389,
+    group: 'gz',
+    chapters: 5,
   },
   {
     key: 'GZ-X3',
@@ -80,6 +98,8 @@ export const books: BookMeta[] = [
     title: '人教版高中英语选择性必修第三册',
     desc: 'Unit 1 至 Unit 5，含课标词与短语',
     count: 355,
+    group: 'gz',
+    chapters: 5,
   },
   {
     key: 'GZ-X4',
@@ -87,6 +107,8 @@ export const books: BookMeta[] = [
     title: '人教版高中英语选择性必修第四册',
     desc: 'Unit 1 至 Unit 5，含课标词与短语',
     count: 339,
+    group: 'gz',
+    chapters: 5,
   },
 ];
 

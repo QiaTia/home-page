@@ -35,15 +35,37 @@ function chunkWords<T>(list: T[], size: number) {
   return result;
 }
 
+/** 按教材自然章节切分；没有章节信息时按固定词数切分 */
+function buildChapters(list: WordItem[]) {
+  if (!list.some((item) => item.c)) return chunkWords(list, WORDS_PER_CHAPTER);
+  const result: WordItem[][] = [];
+  let current: WordItem[] = [];
+  let name: string | undefined;
+  for (const item of list) {
+    const unit = item.c ?? '其他';
+    if (current.length > 0 && unit !== name) {
+      result.push(current);
+      current = [];
+    }
+    name = unit;
+    current.push(item);
+  }
+  if (current.length > 0) result.push(current);
+  return result;
+}
+
 /** 章节数量，按索引中的词数推算，无需加载词表 */
-function chapterCountOf(book: { count: number }) {
-  return Math.ceil(book.count / WORDS_PER_CHAPTER);
+function chapterCountOf(book: { count: number; chapters?: number }) {
+  return book.chapters ?? Math.ceil(book.count / WORDS_PER_CHAPTER);
 }
 
 /** 指定章节的词数 */
 function chapterSizeOf(book: { count: number }, chapterIndex: number) {
   return Math.min(WORDS_PER_CHAPTER, book.count - chapterIndex * WORDS_PER_CHAPTER);
 }
+
+/** 词库分类 */
+type BookGroup = 'cet' | 'gz';
 
 interface PickerProps {
   bookIndex: number;
@@ -56,9 +78,34 @@ interface PickerProps {
 function BookPicker({ bookIndex, chapterIndex, onConfirm, onClose }: PickerProps) {
   const [activeBook, setActiveBook] = useState(bookIndex);
   const [activeChapter, setActiveChapter] = useState(chapterIndex);
+  const [group, setGroup] = useState<BookGroup>(books[bookIndex].group);
   const panelRef = useRef<HTMLDivElement>(null);
+  const bodyRef = useRef<HTMLDivElement>(null);
   const book = books[activeBook];
   const chapterCount = chapterCountOf(book);
+  /** 当前分类下的书目，索引仍指向全局数组，便于回传 */
+  const visibleBooks = books
+    .map((item, index) => ({ item, index }))
+    .filter(({ item }) => item.group === group);
+
+  /** 切换分类时自动选中该分类的第一本书 */
+  function switchGroup(next: BookGroup) {
+    if (next === group) return;
+    setGroup(next);
+    const first = books.findIndex((item) => item.group === next);
+    if (first >= 0) {
+      setActiveBook(first);
+      setActiveChapter(0);
+    }
+  }
+
+  /** 选中书籍后滚动到底部的章节区域，省去手动下滑 */
+  function scrollToChapters() {
+    requestAnimationFrame(() => {
+      const body = bodyRef.current;
+      if (body) body.scrollTo({ top: body.scrollHeight, behavior: 'smooth' });
+    });
+  }
 
   /** 打开后把焦点移入弹窗，便于键盘与读屏操作 */
   useEffect(() => {
@@ -105,12 +152,28 @@ function BookPicker({ bookIndex, chapterIndex, onConfirm, onClose }: PickerProps
           </button>
         </header>
 
-        <div class="wt-picker-tabs">
-          <span class="active">全部词库</span>
+        <div class="wt-picker-tabs" role="tablist">
+          <button
+            role="tab"
+            aria-selected={group === 'cet'}
+            class={classNames(group === 'cet' && 'active')}
+            onClick={() => switchGroup('cet')}
+          >
+            大学英语
+          </button>
+          <button
+            role="tab"
+            aria-selected={group === 'gz'}
+            class={classNames(group === 'gz' && 'active')}
+            onClick={() => switchGroup('gz')}
+          >
+            高中英语（人教版）
+          </button>
         </div>
 
+        <div class="wt-picker-body" ref={bodyRef}>
         <div class="wt-books">
-          {books.map((item, index) => {
+          {visibleBooks.map(({ item, index }) => {
             const active = index === activeBook;
             return (
               <button
@@ -120,6 +183,7 @@ function BookPicker({ bookIndex, chapterIndex, onConfirm, onClose }: PickerProps
                 onClick={() => {
                   setActiveBook(index);
                   setActiveChapter(0);
+                  scrollToChapters();
                 }}
               >
                 <div class="wt-book-top">
@@ -150,7 +214,8 @@ function BookPicker({ bookIndex, chapterIndex, onConfirm, onClose }: PickerProps
         <div class="wt-chapters-head">
           <span>选择章节</span>
           <span>
-            共 {chapterCount} 章 · 每章 {WORDS_PER_CHAPTER} 词
+            共 {chapterCount} 章
+            {book.chapters ? '' : ` · 每章 ${WORDS_PER_CHAPTER} 词`}
           </span>
         </div>
 
@@ -165,6 +230,7 @@ function BookPicker({ bookIndex, chapterIndex, onConfirm, onClose }: PickerProps
               {index + 1}
             </button>
           ))}
+        </div>
         </div>
 
         <footer class="wt-picker-foot">
@@ -263,7 +329,7 @@ export default function WordTyping() {
   const book = books[bookIndex];
   /** 只有词表与当前词库一致时才视为可用，切换词库瞬间不会闪现旧词 */
   const words = wordBook?.key === book.key ? wordBook.list : null;
-  const chapters = useMemo(() => (words ? chunkWords(words, WORDS_PER_CHAPTER) : []), [words]);
+  const chapters = useMemo(() => (words ? buildChapters(words) : []), [words]);
   const chapter = chapters[chapterIndex] ?? chapters[0];
   const word = chapter?.[wordIndex];
   const prevWord = chapter ? chapter[(wordIndex - 1 + chapter.length) % chapter.length] : undefined;
@@ -428,7 +494,7 @@ export default function WordTyping() {
       <div class="wt-shell">
         <header class="wt-topbar">
           <button class="wt-chapter" onClick={() => setPickerOpen(true)}>
-            {book.short} · 第 {chapterIndex + 1} 章
+            {book.short} · {chapter?.[0]?.c ?? `第 ${chapterIndex + 1} 章`}
             <svg class="wt-chevron" viewBox="0 0 24 24">
               <path d="M7 10l5 5 5-5z" />
             </svg>
