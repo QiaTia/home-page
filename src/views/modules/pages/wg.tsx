@@ -6,10 +6,21 @@ import { useEffect, useState } from "preact/hooks"
 
 export default ()=>{
   const [ list, setList ] = useState<API.wgListItemProps[]>([])
+  const [ state, setState ] = useState<'loading' | 'ready' | 'error'>('loading')
   useEffect(()=>{
+    let alive = true
     getWgList()
-      // @ts-ignore
-      .then( list => setList(list));
+      .then( data => {
+        if (!alive) return
+        // 接口异常时可能返回字符串/Error，不能直接交给 map
+        if (!Array.isArray(data)) throw new Error('invalid data')
+        setList(data)
+        setState('ready')
+      })
+      .catch(() => {
+        if (alive) setState('error')
+      })
+    return () => { alive = false }
   }, [])
   return <div className="container article-list">
     {
@@ -24,7 +35,10 @@ export default ()=>{
     </article>)
     }
     {
-      list.length < 1 && <Spin size="large" tip="数据准备中~" />
+      state === 'loading' && <Spin size="large" tip="数据准备中~" />
+    }
+    {
+      state === 'error' && <div className="flex-algin">数据加载失败，请稍后重试~</div>
     }
   </div>
 }

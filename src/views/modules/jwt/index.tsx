@@ -5,37 +5,33 @@ import notify from "@/utils/notify";
 import Input from '@/components/Input';
 import './jwt.less';
 import tiaBus, { type defaultBusEvent } from '@/store/bus';
+import { copy2Clipboard } from '@/utils/utils';
 
 const decoder = new TextDecoder()
+
+/** 转义文本，非对象 payload 与解析失败时也走 dangerouslySetInnerHTML，必须转义 */
+function escapeHtml(value: string) {
+  return value
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;');
+}
 
 export default () => {
   const [ defaultValue, setValue ] = useState<string>(''),
     [preStr, setPreStr] = useState(''),
+    [decoded, setDecoded] = useState(''),
     [ loading, setLoad ] = useState(false);
   /** 复制到粘贴板 */
   const handleCopy = async () => {
-    const temp = handleTo()!;
-    if (navigator.clipboard) {
-      await navigator.clipboard.writeText(temp);
-      notify.success("已复制内容到剪辑版!")
+    if (!decoded) {
+      notify.error('暂无内容可复制!');
+      return;
     }
-    // @ts-ignore
-    else if (window.clipboardData){
-      // @ts-ignore
-      window.clipboardData.clearData();
-      // @ts-ignore
-      clipboardData.setData("Text", temp);
+    try {
+      await copy2Clipboard(decoded);
       notify.success("已复制内容到剪辑版!")
-    } else if(document.execCommand('copy')) {
-      const oInput = document.createElement('input');
-      oInput.value = temp;
-      document.body.appendChild(oInput);
-      // oInput.style.display='none'
-      oInput.select(); // 选择对象
-      document.execCommand("Copy"); // 执行浏览器复制命令
-      oInput.remove();
-      notify.success("已复制内容到剪辑版!")
-    } else {
+    } catch {
       notify.error(`复制失败, 请手动复制!`)
     }
   }
@@ -50,15 +46,21 @@ export default () => {
       return;
     }
     setLoad(true);
-    const list = defaultValue.split('.');
-    return nextParse(list[1] ?? list[0]);
+    try {
+      const list = defaultValue.split('.');
+      const str = nextParse(list[1] ?? list[0]);
+      setDecoded(str);
+    } catch {
+      notify.error('解析失败, 请检查 JWT 内容!');
+    } finally {
+      setLoad(false);
+    }
   }
   /** 数据处理 */
   function nextParse(payload: string) {
     const decodedPayload = atob(payload.replace(/-/g, '+').replace(/_/g, '/'));
     const str = decoder.decode(new Uint8Array(decodedPayload.split('').map(c => c.charCodeAt(0))));
     setPreStr(jsonFormat(str));
-    setTimeout(() =>setLoad(false), 300);
     return str;
   }
   function jsonFormat(jsonTemp: string | object): string {
@@ -71,7 +73,7 @@ export default () => {
         json = JSON.stringify(JSON.parse(jsonTemp), undefined, 2)
       }
       let jsonObj = JSON.parse(json);
-      if (typeof jsonObj === 'object') {
+      if (typeof jsonObj === 'object' && jsonObj !== null) {
         json = json.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
         return json.replace(/("(\\u[a-zA-Z0-9]{4}|\\[^u]|[^\\"])*"(\s*:)?|\b(true|false|null)\b|-?\d+(?:\.\d*)?(?:[eE][+\-]?\d+)?)/g, match => {
           let cls = 'number';
@@ -89,10 +91,10 @@ export default () => {
           return '<span class="' + cls + '">' + match + '</span>';
         });
       } else {
-        return jsonTemp as string;
+        return escapeHtml(typeof jsonTemp === 'string' ? jsonTemp : String(jsonTemp));
       }
     } catch (e) {
-      return jsonTemp as string;
+      return escapeHtml(typeof jsonTemp === 'string' ? jsonTemp : String(jsonTemp));
     }
   }
   function onPate(ev: defaultBusEvent) {

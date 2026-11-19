@@ -23,14 +23,26 @@ export default function () {
   const handleInput = (e: Event) => {
     setValue((e.target as HTMLInputElement).value);
   };
-  /** 跳转: 不包含:// 时补全http://协议头 */
+  /** 跳转: 未写协议时补全 http://，且只允许 http/https 协议 */
   const handleGo = () => {
     const temp = value.trim();
     if (!temp) {
       notify.error('请输入地址!');
       return;
     }
-    window.location.href = temp.includes('://') ? temp : `http://${temp}`;
+    const target = /^[a-zA-Z][a-zA-Z\d+\-.]*:/.test(temp) ? temp : `http://${temp}`;
+    let url: URL;
+    try {
+      url = new URL(target);
+    } catch {
+      notify.error('地址格式不正确!');
+      return;
+    }
+    if (url.protocol !== 'http:' && url.protocol !== 'https:') {
+      notify.error('仅支持 http / https 地址!');
+      return;
+    }
+    window.location.href = url.href;
   };
   const handleKeyDown = (e: KeyboardEvent) => {
     if (e.key === 'Enter') handleGo();

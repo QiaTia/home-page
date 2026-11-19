@@ -2,8 +2,6 @@ import notify from "@/utils/notify";
 import { useEffect, useState } from "preact/hooks";
 import "./style/countdown.less";
 
-let timer: number;
-
 interface modalParams {
   unit: string;
   num: number;
@@ -75,8 +73,7 @@ export default function () {
 
   useEffect(() => {
     window.scrollTo({ top: 46 });
-    clearInterval(timer);
-    timer = window.setInterval(() => {
+    const current = window.setInterval(() => {
       if (isTurn) {
         if (++seconds > 59) {
           seconds = 0;
@@ -100,11 +97,14 @@ export default function () {
           }
         }
       }
-      if (day == 0 && hours == 0 && minutes == 0 && seconds == 0)
+      if (day == 0 && hours == 0 && minutes == 0 && seconds == 0) {
+        // 倒计时结束，切换为正向计时，避免继续减成负数并重复通知
+        isTurn = true;
         notify({ content: "已经达到你预定的时间啦!" });
+      }
       setTime({ day, hours, minutes, seconds });
-      return () => clearInterval(timer);
     }, 1e3);
+    return () => clearInterval(current);
   }, []);
   return (
     <div style={{ height: "100vh" }} className="container flex-algin">

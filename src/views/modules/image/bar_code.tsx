@@ -64,9 +64,15 @@ function barCode() {
       return;
     }
     setLoad(true);
-    const writeOutput = await writeBarcode(defaultValue, writerOptions);
-    setImgUrl(window.btoa(writeOutput.svg));
-    setLoad(false);
+    try {
+      const writeOutput = await writeBarcode(defaultValue, writerOptions);
+      // 用 URL 编码而非 btoa，避免 SVG 含非 Latin-1 字符时抛异常
+      setImgUrl(`data:image/svg+xml;charset=utf-8,${encodeURIComponent(writeOutput.svg)}`);
+    } catch {
+      notify.error("生成二维码失败!");
+    } finally {
+      setLoad(false);
+    }
   }
   /** 粘贴时 */
   function onPate(ev: defaultBusEvent) {
@@ -98,7 +104,7 @@ function barCode() {
           </div>
         </Spin>
         { imgUrl ? <div className="flex-algin">
-          <img style={{ maxWidth: '48vw', minWidth: 200 }} src={ 'data:image/svg+xml;base64,' + imgUrl } alt="base64" />
+          <img style={{ maxWidth: '48vw', minWidth: 200 }} src={ imgUrl } alt="base64" />
         </div> : null}
       </div>
       <div className="flex-center" style={{ gap: 8 }}>

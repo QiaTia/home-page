@@ -138,11 +138,25 @@ export function scrollTo(y = 0) {
   scrollRafId = requestAnimationFrame(step);
 }
 
-export function downFile(payload: Blob | MediaSource) {
+export function downFile(payload: Blob | MediaSource, name?: string) {
+  const url = URL.createObjectURL(payload);
+  const type = payload instanceof Blob ? payload.type : '';
+  const extMap: Record<string, string> = {
+    'image/svg+xml': '.svg',
+    'image/jpeg': '.jpg',
+    'image/png': '.png',
+    'image/webp': '.webp',
+    'image/gif': '.gif',
+  };
+  const ext = name ? '' : (extMap[type] || (type.startsWith('image/') ? `.${type.split('/')[1] || 'bin'}` : ''));
   const downEL = document.createElement('a');
-  downEL.setAttribute('download', Math.ceil(Math.random() * 9e9).toString(32).slice(2));
-  downEL.setAttribute('href', URL.createObjectURL(payload));
+  downEL.setAttribute('download', name || Math.ceil(Math.random() * 9e9).toString(32).slice(2) + ext);
+  downEL.setAttribute('href', url);
+  document.body.appendChild(downEL);
   downEL.click();
+  downEL.remove();
+  // 延迟释放，避免部分浏览器在读取前被回收
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
 }
 
 /** 函数节流 */
@@ -272,28 +286,26 @@ export function addScript(src: string) {
 
 /** 复制文本到剪贴板 */
 export function copy2Clipboard(text: string) {
-  return new Promise<void>((resolve, reject) =>{
-    // @ts-ignore
-    if (window.clipboardData) {
-      // @ts-ignore
-      window.clipboardData.clearData();
-      // @ts-ignore
-      clipboardData.setData("Text", text);
-      resolve();
-    } else if(document.execCommand('copy')) {
-      const oInput = document.createElement('input');
-      oInput.value = text;
-      document.body.appendChild(oInput);
-      // oInput.style.display='none'
-      oInput.select(); // 选择对象
-      document.execCommand("Copy"); // 执行浏览器复制命令
+  // 安全上下文优先使用异步剪贴板 API
+  if (navigator.clipboard?.writeText) {
+    return navigator.clipboard.writeText(text);
+  }
+  return new Promise<void>((resolve, reject) => {
+    const oInput = document.createElement('textarea');
+    oInput.value = text;
+    oInput.style.position = 'fixed';
+    oInput.style.opacity = '0';
+    document.body.appendChild(oInput);
+    oInput.select();
+    try {
+      if (document.execCommand('copy')) resolve();
+      else reject(new Error('copy failed'));
+    } catch (e) {
+      reject(e);
+    } finally {
       oInput.remove();
-      resolve();
-    } else {
-      reject();
     }
   })
-
 }
 /** 获取随机颜色 */
 export function getRandomColor() {

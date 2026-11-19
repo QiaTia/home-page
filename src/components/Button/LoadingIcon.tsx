@@ -1,6 +1,5 @@
 import { LoadingOutlined } from '@ant-design/icons';
-import { createRef } from 'preact';
-import { useEffect, useState } from 'preact/hooks';
+import { useEffect, useRef, useState } from 'preact/hooks';
 
 export interface LoadingIconProps {
   prefixCls: string;
@@ -17,6 +16,13 @@ const getRealWidth = (node: HTMLElement) => ({
 
 const LoadingIcon = ({ prefixCls, loading, existIcon }:LoadingIconProps) => {
   const visible = !!loading;
+  const [ style, setStyle ] = useState(getCollapsedWidth());
+
+  const ref = useRef<HTMLSpanElement>(null);
+
+  useEffect(() => {
+    setStyle(visible && ref.current ? getRealWidth(ref.current) : getCollapsedWidth());
+  }, [visible, existIcon]);
 
   if (existIcon) {
     return (
@@ -25,13 +31,6 @@ const LoadingIcon = ({ prefixCls, loading, existIcon }:LoadingIconProps) => {
       </span>
     );
   }
-  const [ style, setStyle ] = useState(getCollapsedWidth());
-
-  const ref = createRef<HTMLSpanElement>();
-
-  useEffect(() => {
-    setStyle(visible && ref.current ? getRealWidth(ref.current) : getCollapsedWidth());
-  }, [ref, visible]);
 
   return (
     <span className={`${prefixCls}-loading-icon`} style={ style } ref={ref}>

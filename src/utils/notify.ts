@@ -21,6 +21,16 @@ export interface NotifyOption {
 
 const prefixCls = 'notify';
 
+/** 转义用户内容，避免通过 innerHTML 注入脚本 */
+function escapeHtml(value: string) {
+  return value
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
 const $dom = document.createElement("div");
 $dom.className = prefixCls + '-container';
 
@@ -47,9 +57,9 @@ class Notify {
     const iconEl = icon ? `<i class="icon">${Icons[icon]}</i>` : '';
     const NotifyBtn = actions ? `<div class="${prefixCls}-actions">${ actions.map((item, i) => {
       if(item?.onClick) (i ? this._REJECTCB : this._CB).push(item.onClick);
-      return `<button class="${prefixCls}-actions-btn">${item?.name || ['确认', '取消'][i]}</button>`;
+      return `<button class="${prefixCls}-actions-btn">${escapeHtml(item?.name || ['确认', '取消'][i] || '')}</button>`;
     }).join('') }</div>` : '';
-    NotifyDom.innerHTML = `${iconEl}<div class="${prefixCls}-content"><h3 class="${prefixCls}-title">${title}</h3><div class="${prefixCls}-msg">${content}</div>${NotifyBtn}</div><button class="${prefixCls}-btn">${Icons['error']}</button><div class="${prefixCls}-progress-bar"></div>`
+    NotifyDom.innerHTML = `${iconEl}<div class="${prefixCls}-content"><h3 class="${prefixCls}-title">${escapeHtml(title)}</h3><div class="${prefixCls}-msg">${escapeHtml(content)}</div>${NotifyBtn}</div><button class="${prefixCls}-btn">${Icons['error']}</button><div class="${prefixCls}-progress-bar"></div>`
     this.$.append(NotifyDom);
     this.Dom = NotifyDom;
     /** 点击叉叉 回调 */
