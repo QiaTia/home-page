@@ -58,23 +58,34 @@ class Rain {
 class RainList {
   list: Rain[] = [];
   ctx: CanvasRenderingContext2D;
+  /** 逐个生成雨滴的定时器, 组件卸载时需要清理 */
+  private timers: number[] = [];
+  private destroyed = false;
   constructor(ctx: CanvasRenderingContext2D) {
     this.ctx = ctx;
     for (let i = 0; i < 150; i++) {
-      setTimeout(() => this.createRain(), 200*i);
+      this.timers.push(window.setTimeout(() => this.createRain(), 200*i));
     }
   }
   createRain(){
+    if (this.destroyed) return;
     const rain = new Rain();
     rain.draw(this.ctx);
     this.list.push(rain);
   }
   moveRain(){
-    this.ctx.fillStyle = "rgba(0,0,0,100)";
+    // 半透明填充形成拖尾, alpha 需在 0~1 之间
+    this.ctx.fillStyle = "rgba(0,0,0,0.1)";
     this.ctx.fillRect(0,0, window.innerWidth, window.innerHeight);
     for (let k = 0, len = this.list.length; k < len; k++) {
       this.list[k].move(this.ctx);
     }
+  }
+  destroy() {
+    this.destroyed = true;
+    this.timers.forEach((id) => clearTimeout(id));
+    this.timers = [];
+    this.list = [];
   }
 }
 let stop: number;
@@ -89,13 +100,15 @@ function startRain (canvas: HTMLCanvasElement) {
     stop = window.requestAnimationFrame(selfBack);
   }
   selfBack();
+  return sakuraList;
 }
 
 export default function CanvasSnow() {
   const canvasRef = createRef<HTMLCanvasElement>();
   useEffect(() => {
+    let rainList: RainList | undefined;
     if (canvasRef.current) {
-      startRain(canvasRef.current);
+      rainList = startRain(canvasRef.current);
     }
     window.scrollTo({ top: 46 });
     window.onresize = function onResize() {
@@ -107,6 +120,7 @@ export default function CanvasSnow() {
     return function () {
       window.onresize = null;
       window.cancelAnimationFrame(stop);
+      rainList?.destroy();
     }
   }, [canvasRef]);
   return <div style="background-color: #242424" className="home-page">

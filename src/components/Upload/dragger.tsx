@@ -2,7 +2,8 @@ import type { React } from '@/layout/typings';
 import { debounce } from '@/utils/utils';
 import { InboxOutlined } from '@ant-design/icons';
 import classnames from 'classnames';
-import { createRef, forwardRef, HTMLAttributes, RefObject, useState } from "preact/compat";
+import { createRef, forwardRef, RefObject, useState } from "preact/compat";
+import type { InputHTMLAttributes } from "preact";
 
 type BaseDraggerProps = {
   style?: React.Style;
@@ -10,7 +11,7 @@ type BaseDraggerProps = {
   className?: string;
   onFile?: (files: FileList) => void;
   label?: string;
-} & HTMLAttributes<HTMLInputElement>
+} & Omit<InputHTMLAttributes<HTMLInputElement>, 'type' | 'role'>
 
 const DROP = 'drop';
 

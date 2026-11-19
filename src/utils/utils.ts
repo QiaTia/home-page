@@ -102,17 +102,45 @@ export const textToSound = (function () {
 
 type ThemeEmun = 'dark'|'light';
 
+const THEME_KEY = 'tia-theme';
+
+/** 读取用户手动选择的主题 */
+function readStoredTheme(): ThemeEmun | null {
+  try {
+    const value = localStorage.getItem(THEME_KEY);
+    return value == 'dark' || value == 'light' ? value : null;
+  } catch {
+    return null;
+  }
+}
+
 /** 主题设置 */
 export const setTheme = (function() {
-  const themeMedia = window.matchMedia("(prefers-color-scheme: dark)").matches;
-  let currentTheme: ThemeEmun = themeMedia ? 'dark' : 'light';
-  return function({ theme = currentTheme, change = false } = {}) {
-    if(change){
-      currentTheme = currentTheme == 'dark' ? 'light' : 'dark';
-      theme = currentTheme;
-    }
+  const media = window.matchMedia("(prefers-color-scheme: dark)");
+  let currentTheme: ThemeEmun = readStoredTheme() ?? (media.matches ? 'dark' : 'light');
+  const apply = (theme: ThemeEmun) => {
+    currentTheme = theme;
     document.documentElement.setAttribute('theme', theme);
-    return theme;
+  };
+  // 未手动选择过主题时跟随系统变化
+  media.addEventListener('change', (e) => {
+    if (readStoredTheme()) return;
+    apply(e.matches ? 'dark' : 'light');
+  });
+  return function({ theme, change = false }: { theme?: ThemeEmun; change?: boolean } = {}) {
+    let next: ThemeEmun = currentTheme;
+    if(change) next = currentTheme == 'dark' ? 'light' : 'dark';
+    else if(theme) next = theme;
+    apply(next);
+    // 仅在用户主动切换时持久化, 首次读取不写入
+    if(change || theme) {
+      try {
+        localStorage.setItem(THEME_KEY, next);
+      } catch {
+        // 隐私模式等场景下 localStorage 不可用, 忽略即可
+      }
+    }
+    return next;
   }
 })();
 
@@ -138,11 +166,25 @@ export function scrollTo(y = 0) {
   scrollRafId = requestAnimationFrame(step);
 }
 
-export function downFile(payload: Blob | MediaSource) {
+export function downFile(payload: Blob | MediaSource, name?: string) {
+  const url = URL.createObjectURL(payload);
+  const type = payload instanceof Blob ? payload.type : '';
+  const extMap: Record<string, string> = {
+    'image/svg+xml': '.svg',
+    'image/jpeg': '.jpg',
+    'image/png': '.png',
+    'image/webp': '.webp',
+    'image/gif': '.gif',
+  };
+  const ext = name ? '' : (extMap[type] || (type.startsWith('image/') ? `.${type.split('/')[1] || 'bin'}` : ''));
   const downEL = document.createElement('a');
-  downEL.setAttribute('download', Math.ceil(Math.random() * 9e9).toString(32).slice(2));
-  downEL.setAttribute('href', URL.createObjectURL(payload));
+  downEL.setAttribute('download', name || Math.ceil(Math.random() * 9e9).toString(32).slice(2) + ext);
+  downEL.setAttribute('href', url);
+  document.body.appendChild(downEL);
   downEL.click();
+  downEL.remove();
+  // 延迟释放，避免部分浏览器在读取前被回收
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
 }
 
 /** 函数节流 */
@@ -272,28 +314,26 @@ export function addScript(src: string) {
 
 /** 复制文本到剪贴板 */
 export function copy2Clipboard(text: string) {
-  return new Promise<void>((resolve, reject) =>{
-    // @ts-ignore
-    if (window.clipboardData) {
-      // @ts-ignore
-      window.clipboardData.clearData();
-      // @ts-ignore
-      clipboardData.setData("Text", text);
-      resolve();
-    } else if(document.execCommand('copy')) {
-      const oInput = document.createElement('input');
-      oInput.value = text;
-      document.body.appendChild(oInput);
-      // oInput.style.display='none'
-      oInput.select(); // 选择对象
-      document.execCommand("Copy"); // 执行浏览器复制命令
+  // 安全上下文优先使用异步剪贴板 API
+  if (navigator.clipboard?.writeText) {
+    return navigator.clipboard.writeText(text);
+  }
+  return new Promise<void>((resolve, reject) => {
+    const oInput = document.createElement('textarea');
+    oInput.value = text;
+    oInput.style.position = 'fixed';
+    oInput.style.opacity = '0';
+    document.body.appendChild(oInput);
+    oInput.select();
+    try {
+      if (document.execCommand('copy')) resolve();
+      else reject(new Error('copy failed'));
+    } catch (e) {
+      reject(e);
+    } finally {
       oInput.remove();
-      resolve();
-    } else {
-      reject();
     }
   })
-
 }
 /** 获取随机颜色 */
 export function getRandomColor() {

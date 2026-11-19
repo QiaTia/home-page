@@ -1,5 +1,7 @@
 import type { CSSProperties } from 'preact/compat';
 
+type CSSObject = Record<string, unknown>;
+
 const lineWidth = 2;
 
 const token = {
@@ -10,6 +12,10 @@ const token = {
   textPaddingInline: 16,
   orientationMargin: 0.05,
   verticalMarginInline: 8,
+  colorTextHeading: 'rgba(0, 0, 0, 0.88)',
+  colorText: 'rgba(0, 0, 0, 0.88)',
+  fontSizeLG: 16,
+  fontSize: 14,
 }
 
 // ============================== Size ================================

@@ -1,8 +1,8 @@
 import classNames from "classnames";
 import { useEffect, useState } from "preact/hooks";
-import { React } from "@/layout/typings";
-import { createRef, forwardRef } from 'preact/compat';
-import { JSXInternal } from "preact/src/jsx";
+import type { React } from "@/layout/typings";
+import { forwardRef } from 'preact/compat';
+import type { TargetedMouseEvent } from "preact";
 
 export interface PropsItem {
   title?: React.ReactNode;
@@ -10,7 +10,7 @@ export interface PropsItem {
   tooltip?: string
 }
 
-type OnChangeProps = (index: number, e: JSXInternal.TargetedMouseEvent<HTMLLIElement>) => void
+type OnChangeProps = (index: number, e: TargetedMouseEvent<HTMLLIElement>) => void
 
 interface MenuProps {
   list: PropsItem[],
@@ -20,9 +20,8 @@ interface MenuProps {
   ref?: any
 }
 
-function Menu (props: MenuProps) {
+function Menu (props: MenuProps, ref: any) {
   const [ currentIndex, setIndex ] = useState(props.defaultIndex ?? 0);
-  const buttonRef = (props.ref as any) || createRef<HTMLElement>();
 
   const onTap: OnChangeProps = (i, e) => {
     props.onChange?.(i, e);
@@ -32,7 +31,7 @@ function Menu (props: MenuProps) {
     if(props.defaultIndex !== undefined) setIndex(props.defaultIndex);
   }, [props.defaultIndex])
   return (
-    <ul className={classNames('nav-menu', 'flex-row', props.className)} ref={buttonRef}>
+    <ul className={classNames('nav-menu', 'flex-row', props.className)} ref={ref}>
       {
         props.list.map((item, i) => <li 
           key={ i } 

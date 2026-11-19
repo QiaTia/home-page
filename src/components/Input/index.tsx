@@ -1,10 +1,10 @@
 import classNames from "classnames";
 import { createRef } from "preact";
 import { forwardRef } from "preact/compat";
-import { JSXInternal } from "preact/src/jsx";
+import type { InputHTMLAttributes } from "preact";
 import TextArea from './textarea';
 
-type InputProp = { } & JSXInternal.HTMLAttributes<HTMLInputElement>;
+type InputProp = { } & InputHTMLAttributes<HTMLInputElement>;
 function InternalInput (props: InputProp) {
   const { ref, style, className, ...inputProps } = props;
   const inputRef = ref || createRef<HTMLInputElement>();

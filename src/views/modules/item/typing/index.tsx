@@ -13,24 +13,19 @@ export default function typing () {
     [ count, setCount ] = useState({ succes: 0, error: 0 }),
     [isError, setError] = useState(false);
   useEffect(() => {
-    window.onkeydown = function (e) {
+    function onKeyDown(e: KeyboardEvent) {
       if(e.key == 'Control') return ;
       if(current.code == e.keyCode){
         setChar(show());
-        setCount(e => {
-          e.succes ++;
-          return e;
-        });
+        setCount(e => ({ ...e, succes: e.succes + 1 }));
       }else{
-        setCount(e => {
-          e.error ++;
-          return e;
-        });
+        setCount(e => ({ ...e, error: e.error + 1 }));
         onError();
       }
-    };
+    }
+    window.addEventListener('keydown', onKeyDown);
     return function () {
-      window.onkeydown = null;
+      window.removeEventListener('keydown', onKeyDown);
       clearTimeout(errTime);
     }
   },[current]);
@@ -39,10 +34,12 @@ export default function typing () {
     clearTimeout(errTime);
     errTime = window.window.setTimeout(() => setError(false), 300);
   }
+  const total = count.succes + count.error;
+  const rate = total ? (count.succes / total * 100).toFixed(2) : '0.00';
   return <div style="background-color: #242424;justify-content: center;" className="home-page flex-column flex-algin">
       <div onClick={onError} className={ classNames('typing-char ', isError && 'error')}>
         <span>{ current.str }</span>
       </div>
-      <p style="margin-top: 1em;font-size: 1.2em;color: #9e9e9e;">正确数:{ count.succes } 错误数: { count.error } 正确率:{ (count.succes / (count.succes + count.error) * 100).toFixed(2) }% </p>
+      <p style="margin-top: 1em;font-size: 1.2em;color: #9e9e9e;">正确数:{ count.succes } 错误数: { count.error } 正确率:{ rate }% </p>
   </div>
 }

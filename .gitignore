@@ -19,3 +19,6 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# 上传的临时文件
+.uploads

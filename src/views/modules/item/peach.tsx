@@ -75,7 +75,6 @@ class Sakura {
       this.y > window.innerHeight ||
       this.y < 0
     ) {
-      this.r = getRandom('fnr') as number;
       if(Math.random() > 0.4) {
         this.x = getRandom('x') as number;
         this.y = 0;

@@ -5,7 +5,7 @@ import Dragger from "@/components/Upload/dragger";
 import tiaBus, { defaultBusEvent } from "@/store/bus";
 import { useEffect, useState } from "preact/hooks"
 import './tiny.less';
-import { writeBarcode, type WriterOptions, prepareZXingModule, readBarcodes, type ReaderOptions  } from "zxing-wasm";
+import { writeBarcode, type WriterOptions, readBarcodes, type ReaderOptions  } from "zxing-wasm";
 import notify from "@/utils/notify";
 import { copy2Clipboard } from "@/utils/utils";
 // import { addScript } from "@/utils/utils";
@@ -20,16 +20,7 @@ const readerOptions: ReaderOptions = {
   maxNumberOfSymbols: 1,
 };
 
-prepareZXingModule({
-  overrides: {
-    locateFile(path: string, prefix: string) {
-      if (path.endsWith(".wasm")) {
-        return `https://unpkg.com/zxing-wasm@2.1.2/dist/full/${path}`;
-      }
-      return prefix + path;
-    },
-  },
-});
+// zxing-wasm 3.x 默认按自身版本从 CDN 拉取 wasm，无需手动覆盖 locateFile
 
 function barCode() {
   const [ defaultValue, setValue ] = useState<string>('')
@@ -73,9 +64,15 @@ function barCode() {
       return;
     }
     setLoad(true);
-    const writeOutput = await writeBarcode(defaultValue, writerOptions);
-    setImgUrl(window.btoa(writeOutput.svg));
-    setLoad(false);
+    try {
+      const writeOutput = await writeBarcode(defaultValue, writerOptions);
+      // 用 URL 编码而非 btoa，避免 SVG 含非 Latin-1 字符时抛异常
+      setImgUrl(`data:image/svg+xml;charset=utf-8,${encodeURIComponent(writeOutput.svg)}`);
+    } catch {
+      notify.error("生成二维码失败!");
+    } finally {
+      setLoad(false);
+    }
   }
   /** 粘贴时 */
   function onPate(ev: defaultBusEvent) {
@@ -107,7 +104,7 @@ function barCode() {
           </div>
         </Spin>
         { imgUrl ? <div className="flex-algin">
-          <img style={{ maxWidth: '48vw', minWidth: 200 }} src={ 'data:image/svg+xml;base64,' + imgUrl } alt="base64" />
+          <img style={{ maxWidth: '48vw', minWidth: 200 }} src={ imgUrl } alt="base64" />
         </div> : null}
       </div>
       <div className="flex-center" style={{ gap: 8 }}>

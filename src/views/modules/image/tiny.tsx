@@ -13,6 +13,9 @@ let Tiny: Worker;
 
 let isFinish = false;
 
+/** 自增序号，避免同名同大小文件产生重复 uniqueId */
+let fileUid = 0;
+
 interface FileItem {
   /** 文件名 */
   name: string;
@@ -35,7 +38,7 @@ interface FileItem {
 function genFileInfo(file: File): FileItem {
   return {
     name: file.name,
-    uniqueId: file.type + file.name + file.size,
+    uniqueId: `${file.type}${file.name}${file.size}-${fileUid++}`,
     size: file.size,
     type: file.type,
     originFile: file,
@@ -99,7 +102,7 @@ function TinyImage() {
     const item = fileList.find((fileInfo) => fileInfo.uniqueId === id);
     if (!item) return notify.error('文件不存在', void 0);
     if (!item.compressedFile) return notify.error('文件未压缩完成', void 0);
-    downFile(item.compressedFile!);
+    downFile(item.compressedFile!, item.name);
   }
   /** 粘贴时 */
   function onPate(ev: defaultBusEvent) {
@@ -137,9 +140,16 @@ function TinyImage() {
 }
 
 function FileItem(prop: { file: FileItem; isCompressing?: boolean; onDownload: (id: string) => void }) {
+  const [ preview, setPreview ] = useState('');
+  /** 在 effect 中创建并释放预览地址，避免每次渲染泄漏 blob URL */
+  useEffect(() => {
+    const url = URL.createObjectURL(prop.file.originFile);
+    setPreview(url);
+    return () => URL.revokeObjectURL(url);
+  }, [prop.file.originFile]);
   return (<div className="tiny-item flex-between flex-row">
     <div className="tiny-item__cover">
-      <img src={URL.createObjectURL(prop.file.originFile)} alt={prop.file.name} />
+      <img src={preview} alt={prop.file.name} />
     </div>
     <div title={prop.file.name} className="tiny-item__body flex-column flex-auto">
       <h4>{prop.file.name}</h4>

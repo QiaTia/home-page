@@ -1,3 +1,4 @@
+/// <reference types="@uiw/react-amap-types" />
 import { APILoader } from '@uiw/react-amap-api-loader';
 import { useMapContext, useMap, Provider }from '@uiw/react-amap-map';
 import { useEffect, useImperativeHandle, useRef, useState } from 'preact/hooks';
@@ -55,7 +56,7 @@ function CustomMapForward(_: {}, ref: ForwardedRef<CustomMapForwardRef>) {
 const CustomMap = forwardRef<CustomMapForwardRef>(CustomMapForward);
 
 function Mount() {
-  const mapRef = useRef<CustomMapForwardRef>(),
+  const mapRef = useRef<CustomMapForwardRef | null>(null),
     [inputVal, setValue] = useState('');
   function getCenter() {
     const current = mapRef.current?.map?.getCenter();
