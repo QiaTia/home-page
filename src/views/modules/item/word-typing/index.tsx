@@ -65,7 +65,7 @@ function chapterSizeOf(book: { count: number }, chapterIndex: number) {
 }
 
 /** 词库分类 */
-type BookGroup = 'cet' | 'gz';
+type BookGroup = 'all' | 'cet' | 'gz';
 
 interface PickerProps {
   bookIndex: number;
@@ -78,7 +78,7 @@ interface PickerProps {
 function BookPicker({ bookIndex, chapterIndex, onConfirm, onClose }: PickerProps) {
   const [activeBook, setActiveBook] = useState(bookIndex);
   const [activeChapter, setActiveChapter] = useState(chapterIndex);
-  const [group, setGroup] = useState<BookGroup>(books[bookIndex].group);
+  const [group, setGroup] = useState<BookGroup>('all');
   const panelRef = useRef<HTMLDivElement>(null);
   const bodyRef = useRef<HTMLDivElement>(null);
   const book = books[activeBook];
@@ -86,12 +86,13 @@ function BookPicker({ bookIndex, chapterIndex, onConfirm, onClose }: PickerProps
   /** 当前分类下的书目，索引仍指向全局数组，便于回传 */
   const visibleBooks = books
     .map((item, index) => ({ item, index }))
-    .filter(({ item }) => item.group === group);
+    .filter(({ item }) => group === 'all' || item.group === group);
 
   /** 切换分类时自动选中该分类的第一本书 */
   function switchGroup(next: BookGroup) {
     if (next === group) return;
     setGroup(next);
+    if (next === 'all') return;
     const first = books.findIndex((item) => item.group === next);
     if (first >= 0) {
       setActiveBook(first);
@@ -153,6 +154,14 @@ function BookPicker({ bookIndex, chapterIndex, onConfirm, onClose }: PickerProps
         </header>
 
         <div class="wt-picker-tabs" role="tablist">
+          <button
+            role="tab"
+            aria-selected={group === 'all'}
+            class={classNames(group === 'all' && 'active')}
+            onClick={() => switchGroup('all')}
+          >
+            全部
+          </button>
           <button
             role="tab"
             aria-selected={group === 'cet'}
@@ -300,8 +309,8 @@ export default function WordTyping() {
   const [bookIndex, setBookIndex] = useState(initial.book);
   const [chapterIndex, setChapterIndex] = useState(initial.chapter);
   const [wordIndex, setWordIndex] = useState(initial.word);
-  /** 当前单词已正确输入的字符 */
-  const [input, setInput] = useState('');
+  /** 当前单词已输入到的目标下标（允许跳过空格，因此不能用输入字符数表示） */
+  const [cursor, setCursor] = useState(0);
   /** 输错时对应的单词字母下标，短暂标红后恢复 */
   const [errorIndex, setErrorIndex] = useState<number | null>(null);
   /** 自增触发抖动动画重放 */
@@ -398,7 +407,7 @@ export default function WordTyping() {
       setChapterIndex(safeChapter);
       setWordIndex(safeWord);
       // 下标被校正后, 旧的输入进度已不对应当前单词, 一并清空
-      setInput('');
+      setCursor(0);
       setErrorIndex(null);
     }
   }, [chapters, chapterIndex, wordIndex]);
@@ -418,14 +427,14 @@ export default function WordTyping() {
       setChapterIndex(targetChapter);
       setWordIndex(offset > 0 ? 0 : chapters[targetChapter].length - 1);
     }
-    setInput('');
+    setCursor(0);
     setErrorIndex(null);
   }
 
   /** 重置本轮练习数据 */
   function resetSession() {
     setWordIndex(0);
-    setInput('');
+    setCursor(0);
     setErrorIndex(null);
     setStats({ correct: 0, total: 0 });
     setElapsed(0);
@@ -454,8 +463,16 @@ export default function WordTyping() {
       if (paused) return;
 
       const key = e.key.toLowerCase();
-      const expected = word.w[input.length];
-      const isCorrect = key === expected;
+      const target = word.w;
+      // 空格可省略也可输入：字母会自动跳过目标中的空格，空格键则消耗一个空格
+      let next = cursor;
+      if (key === ' ') {
+        if (target[next] === ' ') next += 1;
+      } else {
+        while (target[next] === ' ') next += 1;
+        if (target[next] === key) next += 1;
+      }
+      const isCorrect = next > cursor;
 
       setStats((s) => ({
         total: s.total + 1,
@@ -466,15 +483,14 @@ export default function WordTyping() {
         // 正确键入时清除上一次的报错标记，避免红字盖住已输入正确的字母
         setErrorIndex(null);
         window.clearTimeout(errorTimer.current);
-        const next = input + key;
-        if (next.length === word.w.length) moveWord(1);
-        else setInput(next);
+        if (next >= target.length) moveWord(1);
+        else setCursor(next);
         return;
       }
 
       // 输错：清空单词进度，标红出错位置的字母并左右抖动（单词本身不变）
-      setErrorIndex(input.length);
-      setInput('');
+      setErrorIndex(cursor);
+      setCursor(0);
       setShakeKey((k) => k + 1);
       window.clearTimeout(errorTimer.current);
       errorTimer.current = window.setTimeout(() => setErrorIndex(null), 450);
@@ -482,12 +498,12 @@ export default function WordTyping() {
 
     window.addEventListener('keydown', onKeyDown);
     return () => window.removeEventListener('keydown', onKeyDown);
-  }, [word, input, started, paused, pickerOpen]);
+  }, [word, cursor, started, paused, pickerOpen]);
 
   const minutes = elapsed / 60;
   const wpm = minutes > 0 ? Math.round(stats.correct / 5 / minutes) : 0;
   const accuracy = stats.total > 0 ? Math.round((stats.correct / stats.total) * 100) : 0;
-  const progress = word ? Math.round((input.length / word.w.length) * 100) : 0;
+  const progress = word ? Math.round((cursor / word.w.length) * 100) : 0;
 
   return (
     <div class="wt-page">
@@ -551,7 +567,7 @@ export default function WordTyping() {
                       class={classNames(
                         'wt-char',
                         char === ' ' && 'space',
-                        index < input.length && 'done',
+                        index < cursor && 'done',
                         index === errorIndex && 'wrong'
                       )}
                     >
