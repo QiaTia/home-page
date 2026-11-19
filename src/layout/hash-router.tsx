@@ -38,10 +38,14 @@ function RouteView({ config, url, loading }: RouteViewProps) {
   const [Component, setComponent] = useState<any>(() =>
     config.component.prototype ? config.component : null
   );
+  const [failed, setFailed] = useState(false);
+  // 重试次数, 变化时重新执行加载 effect
+  const [attempt, setAttempt] = useState(0);
 
   useEffect(() => {
     if (Component) return;
     let alive = true;
+    setFailed(false);
     config
       .component()
       .then((mod: any) => {
@@ -49,13 +53,38 @@ function RouteView({ config, url, loading }: RouteViewProps) {
       })
       .catch((error: unknown) => {
         console.error(`路由加载失败：${config.path}`, error);
+        if (alive) setFailed(true);
       });
     return () => {
       alive = false;
     };
-  }, [Component, config]);
+  }, [Component, config, attempt]);
 
-  if (!Component) return <>{loading}</>;
+  if (!Component) {
+    if (!failed) return <>{loading}</>;
+    return (
+      <div
+        style={{
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          justifyContent: 'center',
+          gap: '12px',
+          padding: '48px 16px',
+        }}
+      >
+        <div>页面加载失败，请检查网络后重试~</div>
+        <div style={{ display: 'flex', gap: '12px' }}>
+          <button type="button" onClick={() => setAttempt((n) => n + 1)}>
+            重试
+          </button>
+          <button type="button" onClick={() => window.location.reload()}>
+            刷新页面
+          </button>
+        </div>
+      </div>
+    );
+  }
   return createElement(Component, { path: config.path, url });
 }
 

@@ -266,7 +266,7 @@ export default function WordTyping() {
   const chapters = useMemo(() => (words ? chunkWords(words, WORDS_PER_CHAPTER) : []), [words]);
   const chapter = chapters[chapterIndex] ?? chapters[0];
   const word = chapter?.[wordIndex];
-  const prevWord = chapter?.[wordIndex - 1];
+  const prevWord = chapter ? chapter[(wordIndex - 1 + chapter.length) % chapter.length] : undefined;
   const nextWord = chapter ? chapter[(wordIndex + 1) % chapter.length] : undefined;
 
   /** 暂停、打开词库弹窗时停止计时 */
@@ -328,14 +328,30 @@ export default function WordTyping() {
     if (chapters.length === 0) return;
     const safeChapter = Math.min(chapterIndex, chapters.length - 1);
     const safeWord = Math.min(wordIndex, chapters[safeChapter].length - 1);
-    if (safeChapter !== chapterIndex) setChapterIndex(safeChapter);
-    if (safeWord !== wordIndex) setWordIndex(safeWord);
+    if (safeChapter !== chapterIndex || safeWord !== wordIndex) {
+      setChapterIndex(safeChapter);
+      setWordIndex(safeWord);
+      // 下标被校正后, 旧的输入进度已不对应当前单词, 一并清空
+      setInput('');
+      setErrorIndex(null);
+    }
   }, [chapters, chapterIndex, wordIndex]);
 
-  /** 切换到相邻单词，清空当前进度 */
+  /** 切换到相邻单词，清空当前进度；越过章节边界时自动切换章节 */
   function moveWord(offset: number) {
     if (!chapter) return;
-    setWordIndex((i) => (i + offset + chapter.length) % chapter.length);
+    const nextIndex = wordIndex + offset;
+    if (nextIndex >= 0 && nextIndex < chapter.length) {
+      setWordIndex(nextIndex);
+    } else if (chapters.length <= 1) {
+      // 只有一章时在章内循环
+      setWordIndex((nextIndex + chapter.length) % chapter.length);
+    } else {
+      const targetChapter =
+        (chapterIndex + (offset > 0 ? 1 : -1) + chapters.length) % chapters.length;
+      setChapterIndex(targetChapter);
+      setWordIndex(offset > 0 ? 0 : chapters[targetChapter].length - 1);
+    }
     setInput('');
     setErrorIndex(null);
   }

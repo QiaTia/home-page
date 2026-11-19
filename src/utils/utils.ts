@@ -102,17 +102,45 @@ export const textToSound = (function () {
 
 type ThemeEmun = 'dark'|'light';
 
+const THEME_KEY = 'tia-theme';
+
+/** 读取用户手动选择的主题 */
+function readStoredTheme(): ThemeEmun | null {
+  try {
+    const value = localStorage.getItem(THEME_KEY);
+    return value == 'dark' || value == 'light' ? value : null;
+  } catch {
+    return null;
+  }
+}
+
 /** 主题设置 */
 export const setTheme = (function() {
-  const themeMedia = window.matchMedia("(prefers-color-scheme: dark)").matches;
-  let currentTheme: ThemeEmun = themeMedia ? 'dark' : 'light';
-  return function({ theme = currentTheme, change = false } = {}) {
-    if(change){
-      currentTheme = currentTheme == 'dark' ? 'light' : 'dark';
-      theme = currentTheme;
-    }
+  const media = window.matchMedia("(prefers-color-scheme: dark)");
+  let currentTheme: ThemeEmun = readStoredTheme() ?? (media.matches ? 'dark' : 'light');
+  const apply = (theme: ThemeEmun) => {
+    currentTheme = theme;
     document.documentElement.setAttribute('theme', theme);
-    return theme;
+  };
+  // 未手动选择过主题时跟随系统变化
+  media.addEventListener('change', (e) => {
+    if (readStoredTheme()) return;
+    apply(e.matches ? 'dark' : 'light');
+  });
+  return function({ theme, change = false }: { theme?: ThemeEmun; change?: boolean } = {}) {
+    let next: ThemeEmun = currentTheme;
+    if(change) next = currentTheme == 'dark' ? 'light' : 'dark';
+    else if(theme) next = theme;
+    apply(next);
+    // 仅在用户主动切换时持久化, 首次读取不写入
+    if(change || theme) {
+      try {
+        localStorage.setItem(THEME_KEY, next);
+      } catch {
+        // 隐私模式等场景下 localStorage 不可用, 忽略即可
+      }
+    }
+    return next;
   }
 })();
 
