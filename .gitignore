@@ -22,3 +22,7 @@ dist-ssr
 
 # 上传的临时文件
 .uploads
+
+# FC 模拟器：版权 ROM 与派生清单仅本机保留，不入库 / 不分发（用户自行拖拽或导入）
+public/roms/*.nes
+public/roms/manifest.json
