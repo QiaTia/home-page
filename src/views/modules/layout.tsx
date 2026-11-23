@@ -87,6 +87,11 @@ export default function () {
       h: '/webitem/panorama'
     },
     {
+      t: "FC 模拟器",
+      d: "JASMINE·FC 在线 NES/FC 模拟器, 即时存档与手柄震动",
+      h: '/webitem/emulator'
+    },
+    {
       t: "Exam",
       d: "毕业设计项目, 在线考试系统",
       h: "https://github.com/qiatia/exam"

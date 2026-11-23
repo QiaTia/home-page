@@ -92,5 +92,9 @@ export default [
     title: '全景',
     path: '/webitem/panorama',
     component: () => import('@/views/modules/item/panorama')
+  }, {
+    title: 'FC模拟器',
+    path: '/webitem/emulator',
+    component: () => import('@/views/modules/fc')
   }
 ];
