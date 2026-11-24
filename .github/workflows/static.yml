@@ -53,6 +53,7 @@ jobs:
         with:
           # 上传构建产物
           path: './dist/'
+      # deploy-pages v5 的产物查询存在最终一致性延迟，立即查询会偶发返回 0 个产物
       - name: Wait for artifact availability
         run: sleep 20
       - name: Deploy to GitHub Pages
