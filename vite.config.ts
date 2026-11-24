@@ -2,7 +2,6 @@ import { defineConfig } from 'vite';
 import preact from '@preact/preset-vite';
 import { VitePWA } from 'vite-plugin-pwa';
 import * as path from "path";
-import viteCompression from 'vite-plugin-compression';
 
 // https://vitejs.dev/config/
 export default defineConfig({
@@ -12,15 +11,6 @@ export default defineConfig({
   },
   plugins: [
     preact(),
-    viteCompression({
-      ext: '.gz',
-      deleteOriginFile: false,
-    }),
-    viteCompression({
-      ext: '.br',
-      algorithm: 'brotliCompress',
-      deleteOriginFile: false,
-    }),
     VitePWA({
       registerType: 'autoUpdate',
       // 注册脚本延迟执行, 不阻塞首屏解析
@@ -59,7 +49,7 @@ export default defineConfig({
           'assets/preact-*.js',
           'favicon.ico',
         ],
-        globIgnores: ['**/*.gz', '**/*.br', '**/jsnes.min.js', '**/panorama.jpg'],
+        globIgnores: ['**/jsnes.min.js', '**/panorama.jpg'],
         navigateFallback: 'index.html',
         cleanupOutdatedCaches: true,
         maximumFileSizeToCacheInBytes: 3 * 1024 * 1024,
@@ -73,6 +63,18 @@ export default defineConfig({
               expiration: {
                 maxEntries: 300,
                 maxAgeSeconds: 60 * 60 * 24 * 365,
+              },
+            },
+          },
+          {
+            // public 下的图片等静态资源: 先返回缓存, 后台更新
+            urlPattern: /\.(?:png|jpe?g|webp|gif|svg|ico)$/i,
+            handler: 'StaleWhileRevalidate',
+            options: {
+              cacheName: 'qiatia-images',
+              expiration: {
+                maxEntries: 60,
+                maxAgeSeconds: 60 * 60 * 24 * 30,
               },
             },
           },
