@@ -46,7 +46,6 @@ export default defineConfig({
           'assets/index-*.css',
           'assets/hooks-*.js',
           'assets/notify-*.js',
-          'assets/preact-*.js',
           'favicon.ico',
         ],
         globIgnores: ['**/jsnes.min.js', '**/panorama.jpg'],
