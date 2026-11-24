@@ -23,6 +23,8 @@ export default defineConfig({
     }),
     VitePWA({
       registerType: 'autoUpdate',
+      // 注册脚本延迟执行, 不阻塞首屏解析
+      injectRegister: 'script-defer',
       // 图标只在安装时读取, 不放入首访预缓存
       includeManifestIcons: false,
       manifest: {
@@ -50,7 +52,7 @@ export default defineConfig({
         // 预缓存应用外壳, 避免把词库/模拟器等按需资源也塞进首访下载
         globPatterns: [
           'index.html',
-          'assets/index-*.js',
+          'assets/entry-*.js',
           'assets/index-*.css',
           'assets/hooks-*.js',
           'assets/notify-*.js',
@@ -85,5 +87,13 @@ export default defineConfig({
     alias: {
       '@': path.resolve(import.meta.dirname, './src'),
     }
-  }
+  },
+  build: {
+    rolldownOptions: {
+      output: {
+        // 入口块固定前缀, 便于 PWA 精确预缓存且不会误匹配路由块
+        entryFileNames: 'assets/entry-[hash].js',
+      },
+    },
+  },
 });
