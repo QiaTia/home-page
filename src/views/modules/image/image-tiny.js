@@ -2,8 +2,12 @@ var callBack;
 
 var pngtiny = { status: 'loading' };
 pngtiny.instantiateWasm = function (importObject, receiveInstance) {
-  fetch('/pngtiny-custom.wasm')
-    .then((response) => response.arrayBuffer())
+  // 站点可能部署在子路径下（如 GitHub Pages 的 /home-page/），必须基于 base 取 wasm
+  fetch(import.meta.env.BASE_URL + 'pngtiny-custom.wasm')
+    .then((response) => {
+      if (!response.ok) throw new Error('wasm 加载失败: ' + response.status);
+      return response.arrayBuffer();
+    })
     .then((bytes) => WebAssembly.instantiate(bytes, importObject))
     .then((result) => receiveInstance(result.instance));
 };

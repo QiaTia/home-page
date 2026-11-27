@@ -90,6 +90,9 @@ export default defineConfig({
     }
   },
   build: {
+    // 入口已静态引入共享块, 不需要额外的 modulepreload 提示
+    // (与 Service Worker 缓存叠加时, 浏览器会报 "preloaded but not used" 警告)
+    modulePreload: false,
     rolldownOptions: {
       output: {
         // 入口块固定前缀, 便于 PWA 精确预缓存且不会误匹配路由块
